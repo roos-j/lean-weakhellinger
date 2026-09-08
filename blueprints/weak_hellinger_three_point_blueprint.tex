@@ -1,0 +1,1048 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,amsmath,amssymb,amsthm,mathtools}
+\usepackage[margin=24mm]{geometry}
+\usepackage{microtype,booktabs,longtable,array,enumitem,fancyhdr,listings}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt plus 1pt}
+\setlength{\abovedisplayskip}{7pt plus 2pt}
+\setlength{\belowdisplayskip}{7pt plus 2pt}
+\setlength{\headheight}{14pt}
+\setcounter{tocdepth}{2}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{fact}{Library fact}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{specification}{Specification}[section]
+\newcommand{\E}[2]{\refstepcounter{equation}\[#2\tag{\theequation}\label{eq:#1}\]}
+\newcommand{\R}{\mathbb R}
+\newcommand{\Zz}{\mathbb Z}
+\newcommand{\N}{\mathbb N}
+\newcommand{\Qq}{\mathbb Q}
+\newcommand{\dd}{\,d}
+\newcommand{\lean}[1]{{\small\nolinkurl{#1}}}
+\DeclareMathOperator{\artanh}{arctanh}
+\DeclareMathOperator{\ev}{ev}
+\DeclareMathOperator{\coeff}{coeff}
+\DeclareMathOperator{\supp}{supp}
+\DeclareMathOperator{\normp}{normalize}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Weak Hellinger inequality}
+\fancyhead[R]{\small Autoformalization blueprint}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{.3pt}
+\lstset{basicstyle=\ttfamily\small,columns=fullflexible,keepspaces=true,
+ breaklines=true,showstringspaces=false,frame=single,framerule=.2pt}
+\hypersetup{pdftitle={Weak Hellinger three-point inequality: autoformalization blueprint}}
+\title{\vspace{-1.5em}Weak Hellinger three-point inequality\\\large A forward-reasoning autoformalization blueprint}
+\author{}
+\date{7 September 2026}
+\begin{document}
+\maketitle
+\vspace{-1.8em}
+\section{Introduction: the main theorem}
+\begin{theorem}[Weak Hellinger three-point inequality]\label{thm:main}
+For real $s,c,d\in[0,1]$, use the following definitions. Write $\bar x=1-x$ and define
+\E{main-rD}{r(x)=\sqrt{1-x^2},\qquad
+ D(u\mid v)=u\log\frac uv+(1-u)\log\frac{1-u}{1-v}.}
+For $u,v\in(0,1)$ define $K(u\mid v)=D(u\mid v)/(u-v)^2$ when $u\ne v$, and define
+\E{main-Kdiag}{K(v\mid v)=\frac1{2v(1-v)}.}
+These are definitions, including the prescribed diagonal value. Put
+\E{main-pq}{p=s(1-c)+(1-s)d,\qquad q=s(1-d)+(1-s)c.}
+For $c,d\in(0,1)$ define
+\E{main-R}{R(s,c,d)=\sqrt{\frac{K(p\mid q)}{sK(c\mid d)+(1-s)K(d\mid c)}}.}
+If at least one of $c,d$ is an endpoint, define $R(s,c,d)=1$ when $s=0$, $s=1$, or $c+d=1$, and define $R(s,c,d)=0$ otherwise. Then
+\E{main-ineq}{r(2q-1)-s\,r(2d-1)-(1-s)r(2c-1)+R(s,c,d)\leq1.}
+Equality in \eqref{eq:main-ineq} holds if and only if
+\E{main-equality}{s=0\quad\text{or}\quad s=1\quad\text{or}\quad c+d=1
+ \quad\text{or}\quad \bigl(s=\tfrac12\ \text{and}\ c=d\bigr).}
+\end{theorem}
+\noindent\textit{Proof of Theorem~\ref{thm:main}.}
+The proof begins here and continues through the completion of the boundary case. Each auxiliary assertion is proved where it is stated; subsequent arguments use only earlier results. The final section then proves that the prescribed boundary values are the upper-semicontinuous envelope of the interior function.
+
+This is a blueprint, not a compiled Lean development. The mathematical input is the revised proof \cite{source-short}, with the algebraic coordinates from the original proof \cite{source-original}. The latter avoid introducing $\tanh$ and its inverse identities. All problem-specific analysis and all certificate-soundness arguments are given below. The finite checks are specified as closed integer computations, not as hypotheses supplied by Python. Their independent exact execution was repeated in preparing this document; their Lean proofs still have to be compiled and kernel checked.
+
+\paragraph{Formal definitions.}
+Use real-valued functions. Give $K$ the value $0$ outside $(0,1)^2$, and give $R$ the value $0$ outside $[0,1]^3$. These outside-domain choices have no mathematical role. Inside the cube, branch first on $c,d\in(0,1)$, then use exactly the boundary branches in the theorem. In particular, neither real division by zero nor \lean{Real.log 0} is used to choose a boundary value. All displayed identities below involving a quotient include hypotheses that make its relevant denominators nonzero. Definitions such as \eqref{eq:main-rD}--\eqref{eq:main-R} prescribe objects and do not require a separate proof.
+
+\section{Library facts and elementary analytic preliminaries}
+\begin{fact}[Calculus and order facts used]\label{lib:calculus}
+The following facts are used in their real one-variable forms.
+For $x>0$, the derivatives of $\log x$ and $\sqrt{x}$ are $1/x$ and $1/(2\sqrt{x})$.
+If $F$ has derivative $G$ at every point of $[a,b]$, with $a\leq b$, and $G$ is continuous on $[a,b]$, then
+\E{FTC}{\int_a^b G(x)\dd x=F(b)-F(a).}
+For continuous functions $f,g$ on $[a,b]$, pointwise $f\leq g$ implies the same inequality between their integrals. If $F$ is continuous on $[a,b]$, differentiable on $(a,b)$, and $a<b$, there is $\xi\in(a,b)$ with
+\E{MVT}{F(b)-F(a)=(b-a)F'(\xi).}
+A continuous function on an interval that has opposite weak signs at its endpoints takes the value zero between them.
+\end{fact}
+\begin{proof}[Library justification]
+For the derivative rules use \lean{Real.hasDerivAt_log} and \lean{Real.hasDerivAt_sqrt}; positivity implies the nonzero hypotheses of those declarations \cite{lib-log,lib-sqrt}. Formula \eqref{eq:FTC} is \lean{intervalIntegral.integral_eq_sub_of_hasDerivAt}, using \lean{ContinuousOn.intervalIntegrable}. Integral comparison is the continuous specialization of \lean{intervalIntegral.integral_mono_on} \cite{lib-ftc,lib-integral}. Formula \eqref{eq:MVT} follows from \lean{exists_hasDerivAt_eq_slope}, multiplying by $b-a>0$ \cite{lib-mvt}. The last assertion is the real specialization of the intermediate value theorem \cite{lib-ivt}. These are library theorems, not new axioms. The product, quotient, and chain rules, continuity of arithmetic operations, elementary logarithm identities on positive arguments, finite-sum identities, and ordered-field arithmetic are also used in their standard mathlib forms.
+\end{proof}
+
+\begin{lemma}[Square-root facts]\label{lem:r}
+For $|x|\leq1$, $0\leq r(x)\leq1$, $r(-x)=r(x)$, and $r(x)^2=1-x^2$.
+Moreover, $r(x)>0$ if $|x|<1$; $r(x)=1$ exactly when $x=0$; and $r(x)=0$ exactly when $x=1$ or $x=-1$. If $|x|,|y|\leq1$, then $r(x)=r(y)$ exactly when $x^2=y^2$. The function $r$ is continuous, and on $(-1,1)$,
+\E{rder}{r'(x)=-\frac{x}{r(x)}.}
+\end{lemma}
+\begin{proof}
+The assumption gives $0\leq1-x^2\leq1$. The square-root order and square identities give the first bounds and $r(x)^2=1-x^2$. Evenness follows from $(-x)^2=x^2$. The strict positivity and the two specified level sets follow by squaring nonnegative quantities and factoring $1-x^2=(1-x)(1+x)$. The equality criterion follows in the same way. Continuity is composition of the polynomial $1-x^2$ with the continuous real square root. For \eqref{eq:rder}, the chain rule in Library fact~\ref{lib:calculus} gives $(-2x)/(2\sqrt{1-x^2})$; its denominator is positive because $|x|<1$.
+\end{proof}
+
+\begin{definition}[The elementary inverse hyperbolic function]\label{def:artanh}
+For $|x|<1$ define
+\E{artanhdef}{\artanh x=\frac12\bigl(\log(1+x)-\log(1-x)\bigr).}
+Only this logarithmic expression, not an inverse-function construction, is needed.
+\end{definition}
+\begin{lemma}[Derivative and logarithmic identities]\label{lem:artanh}
+On $(-1,1)$, $\artanh$ is odd, vanishes at zero, and has derivative
+\E{artanhder}{\frac{d}{dx}\artanh x=\frac1{1-x^2}.}
+For $0<v,y<1$, put $z=vy$. Then $(v+y)/(1+z)$ and $(v-y)/(1-z)$ lie in $(-1,1)$, and
+\E{artanhadd}{\artanh\frac{v+y}{1+z}=\artanh v+\artanh y,\qquad
+ \artanh\frac{v-y}{1-z}=\artanh v-\artanh y.}
+\end{lemma}
+\begin{proof}
+Oddness and the value at zero follow directly from \eqref{eq:artanhdef}. Both logarithm arguments are positive. Differentiation gives
+$\tfrac12((1+x)^{-1}+(1-x)^{-1})=(1-x^2)^{-1}$, proving \eqref{eq:artanhder}.
+For the first argument, its denominator exceeds its numerator by $(1-v)(1-y)>0$ and its numerator is positive. For the second, $1-z-(v-y)=(1-v)(1+y)>0$ and $1-z+(v-y)=(1+v)(1-y)>0$.
+For either sign, the ratio $(1+\text{argument})/(1-\text{argument})$ factors: in the first case it is $(1+v)(1+y)/[(1-v)(1-y)]$, and in the second it is $(1+v)(1-y)/[(1-v)(1+y)]$. All factors are positive. Apply the product and quotient identities for the logarithm and divide by two. This proves both identities in \eqref{eq:artanhadd}.
+\end{proof}
+
+\begin{lemma}[Integral remainder on the unit interval]\label{lem:remainder}
+If $F$ is twice continuously differentiable on a neighborhood of $[0,1]$, then
+\E{unit-remainder}{F(1)-F(0)-F'(0)=\int_0^1(1-\lambda)F''(\lambda)\dd\lambda.}
+\end{lemma}
+\begin{proof}
+The derivative of $(1-\lambda)F'(\lambda)$ is $-F'(\lambda)+(1-\lambda)F''(\lambda)$. All terms are continuous on the integration interval. Apply \eqref{eq:FTC} to this derivative and to $F'$, then add the resulting equalities. The endpoint contribution from $(1-\lambda)F'(\lambda)$ is $-F'(0)$, while that from $F'$ is $F(1)-F(0)$. This is \eqref{eq:unit-remainder}.
+\end{proof}
+
+\begin{lemma}[Integral formula, including the diagonal]\label{lem:Kintegral}
+For $u,v\in(0,1)$,
+\E{Kintegral}{K(u\mid v)=\int_0^1
+ \frac{1-\lambda}{x(\lambda)(1-x(\lambda))}\dd\lambda,
+ \qquad x(\lambda)=(1-\lambda)v+\lambda u.}
+\end{lemma}
+\begin{proof}
+Set $\varphi(x)=x\log x+(1-x)\log(1-x)$ on $(0,1)$. The product rule gives $\varphi'(x)=\log x-\log(1-x)$: the two constant derivative terms cancel. A second derivative gives $1/x+1/(1-x)=1/[x(1-x)]$.
+Expanding the logarithms in $D$ gives $D(u\mid v)=\varphi(u)-\varphi(v)-\varphi'(v)(u-v)$; specifically, the coefficients of $\log v$ and $\log(1-v)$ after subtraction are $-u$ and $-(1-u)$.
+The segment between $u$ and $v$ lies in a compact subinterval of $(0,1)$, so $F(\lambda)=\varphi(x(\lambda))$ satisfies Lemma~\ref{lem:remainder}. Its derivatives are $F'(\lambda)=(u-v)\varphi'(x(\lambda))$ and $F''(\lambda)=(u-v)^2/[x(\lambda)(1-x(\lambda))]$. If $u\ne v$, divide \eqref{eq:unit-remainder} by the positive number $(u-v)^2$ and use the definition of $K$. If $u=v$, $x(\lambda)=v$ and the integral is $[v(1-v)]^{-1}\int_0^1(1-\lambda)\dd\lambda=1/[2v(1-v)]$, the prescribed value. This proves \eqref{eq:Kintegral} in both cases.
+\end{proof}
+
+\begin{lemma}[Positivity and quantitative continuity of $K$]\label{lem:Kregular}
+The function $K$ is continuous on $(0,1)^2$ and $K(u\mid v)\geq2$ there. If $0<\eta\leq1/2$ and all of $u,v,u',v'$ belong to $[\eta,1-\eta]$, then
+\E{Kbound}{K(u\mid v)\leq\frac1{2\eta^2},\qquad
+ |K(u\mid v)-K(u'\mid v')|
+ \leq\frac{|u-u'|+|v-v'|}{2\eta^4}.}
+Also $K(1-u\mid1-v)=K(u\mid v)$ for $u,v\in(0,1)$.
+\end{lemma}
+\begin{proof}
+For $0<x<1$, $(x-1/2)^2\geq0$ implies $x(1-x)\leq1/4$; the integrand in \eqref{eq:Kintegral} is therefore at least $4(1-\lambda)$. Its integral is $2$.
+On $[\eta,1-\eta]$, both factors $x,1-x$ are at least $\eta$, giving the first estimate in \eqref{eq:Kbound}. For $x,x'$ in that interval,
+$|x(1-x)-x'(1-x')|=|x-x'||1-x-x'|\leq|x-x'|$.
+Consequently the difference of their reciprocals has absolute value at most $|x-x'|/\eta^4$.
+The two affine interpolants in \eqref{eq:Kintegral} differ in absolute value by at most $|u-u'|+|v-v'|$. Multiply by $1-\lambda$, integrate, and use $\int_0^1(1-\lambda)\dd\lambda=1/2$. This proves the second estimate and hence local continuity, including on the diagonal. Finally, replacing $u,v$ by $1-u,1-v$ replaces $x(\lambda)$ by $1-x(\lambda)$, leaving the integrand unchanged.
+\end{proof}
+
+\section{One-variable logarithmic estimates}
+\begin{definition}[The two nonsingular integral functions]\label{def:HI}
+For $0\leq X<1$ define
+\E{HIdef}{H(X)=\int_0^1\frac{\dd\lambda}{1-X\lambda^2},\qquad
+ I(X)=\int_0^1\frac{1-\lambda^2}{1-X\lambda^2}\dd\lambda.}
+The integrands are continuous since $1-X\lambda^2\geq1-X>0$ on $[0,1]$.
+\end{definition}
+\begin{lemma}[Evaluation and differentiation of $H$ and $I$]\label{lem:HIidentities}
+One has $H(0)=1$ and $I(0)=2/3$. For $0<X<1$,
+\E{Hformula}{H(X)=\frac{\artanh\sqrt X}{\sqrt X},\qquad
+ H'(X)=\frac{1/(1-X)-H(X)}{2X}.}
+For $0\leq X<1$,
+\E{Iformula}{X I(X)=1-(1-X)H(X).}
+The function $H$ is continuous on $[0,1)$.
+\end{lemma}
+\begin{proof}
+At $X=0$ the integrands are $1$ and $1-\lambda^2$, whose integrals are $1$ and $2/3$. For $X>0$, the derivative with respect to $\lambda$ of $\artanh(\sqrt X\lambda)/\sqrt X$ is $1/(1-X\lambda^2)$ by Lemma~\ref{lem:artanh}. The argument has absolute value at most $\sqrt X<1$ on the interval, so the fundamental theorem gives the first identity in \eqref{eq:Hformula}. Differentiate it with respect to $X$, using $(\sqrt X)'=1/(2\sqrt X)$; combining the two quotient-rule terms gives its second identity. All expressions are continuous for $0<X<1$.
+For \eqref{eq:Iformula}, multiply the integrand of $I$ by $X$ and note that it equals $1-(1-X)/(1-X\lambda^2)$. Integration gives the assertion also at $X=0$.
+At zero, the identity
+$1/(1-X\lambda^2)-1=X\lambda^2/(1-X\lambda^2)$ gives
+$0\leq H(X)-1\leq X/[3(1-X)]$ for $0\leq X<1$. The upper bound tends to zero as $X\downarrow0$, proving the remaining continuity assertion. No integral at $X=1$ is used.
+\end{proof}
+
+\begin{lemma}[Bounds for $H$]\label{lem:Hbounds}
+For $0\leq X<1$,
+\E{Hbounds}{1+\frac X3\leq H(X)\leq\frac{7+X}{15}+\frac8{15\sqrt{1-X}}.}
+\end{lemma}
+\begin{proof}
+The identity $(1-h)^{-1}-(1+h)=h^2/(1-h)\geq0$ for $0\leq h<1$, applied to $h=X\lambda^2$, gives the lower bound after integration.
+For the upper bound define, for $0\leq x<1$, the function
+$g(x)=x((7+x^2)/15+8/(15r(x)))-\artanh x$.
+It is continuous on each $[0,x_0]$ with $x_0<1$, differentiable there, and $g(0)=0$.
+The product rule and Lemmas~\ref{lem:r} and \ref{lem:artanh} give
+\E{gder}{g'(x)=\frac{7+3x^2}{15}+\frac8{15r(x)^3}-\frac1{r(x)^2}
+ =\frac{(1-r(x))^3(3r(x)^2+9r(x)+8)}{15r(x)^3}.}
+For the first equality, combine $8/(15r(x))$ and $8x^2/(15r(x)^3)$ using $r(x)^2+x^2=1$. For the second, replace $x^2$ by $1-r(x)^2$ and expand
+$(1-r)^3(3r^2+9r+8)=8-15r+10r^3-3r^5$.
+Thus \eqref{eq:gder} is an explicit polynomial identity after multiplication by $15r(x)^3>0$.
+Since $0<r(x)\leq1$, the derivative is nonnegative. The mean value theorem on $[0,x]$ gives $g(x)\geq0$. For $X>0$, divide this inequality at $x=\sqrt X$ by $x>0$ and use \eqref{eq:Hformula}. At $X=0$, both sides of the claimed upper bound equal $1$.
+\end{proof}
+
+\begin{lemma}[Bounds for $I$]\label{lem:Ibounds}
+For $0\leq X<1$,
+\E{Ibounds}{\frac23\leq I(X)\leq\frac{2+X}{3}.}
+\end{lemma}
+\begin{proof}
+For $0\leq\lambda\leq1$, the denominator $1-X\lambda^2$ belongs to $(0,1]$, so the middle term below is at least the left one:
+\E{Ipointwise}{1-\lambda^2\leq\frac{1-\lambda^2}{1-X\lambda^2}
+ \leq1-(1-X)\lambda^2.}
+The difference between the last two terms, right minus middle, is
+$X(1-X)\lambda^4/(1-X\lambda^2)\geq0$, obtained by multiplying by the positive denominator. Integrating \eqref{eq:Ipointwise} gives $2/3$ on the left and $1-(1-X)/3=(2+X)/3$ on the right. The integrands are continuous by Definition~\ref{def:HI}.
+\end{proof}
+
+\begin{lemma}[A logarithm difference estimate]\label{lem:Hdifference}
+If $0<Z<Y<1$, $P=1-Z$ and $\sigma=\sqrt{1-Y}$, then
+\E{Hdiff}{H(Y)-H(Z)\leq\frac12\log\frac{P}{\sigma^2}-\frac{Y-Z}{6}
+ \leq(Y-Z)\left(\frac1{2\sqrt P\,\sigma}-\frac16\right).}
+\end{lemma}
+\begin{proof}
+By \eqref{eq:Hformula} and the lower bound in \eqref{eq:Hbounds}, for $0<X<1$,
+$H'(X)\leq[1/(1-X)-1-X/3]/(2X)=1/[2(1-X)]-1/6$.
+All these functions are continuous on $[Z,Y]$. Integrate this inequality and use the antiderivative $-\tfrac12\log(1-X)-X/6$. This proves the first inequality in \eqref{eq:Hdiff}.
+For $h\geq1$, the derivative of $h-h^{-1}-2\log h$ is $(1-h^{-1})^2\geq0$, and its value at $h=1$ is zero. The mean value theorem therefore gives $2\log h\leq h-h^{-1}$.
+Take $h=\sqrt P/\sigma>1$, since $P-\sigma^2=Y-Z>0$. Then $2\log h=\log(P/\sigma^2)$ and $h-h^{-1}=(Y-Z)/(\sqrt P\,\sigma)$. Substitution proves the second inequality. All logarithm arguments and denominators are positive.
+\end{proof}
+
+\section{Reduction to nonnegative spatial coordinates}
+\begin{lemma}[Domain, continuity, and the divergence ratio]\label{lem:domain}
+If $s\in[0,1]$ and $c,d\in(0,1)$, then $p,q\in(0,1)$, the denominator in \eqref{eq:main-R} is positive, and $R$ is continuous on this domain, including $c=d$ and the relative $s$-endpoints. If $c\ne d$, then
+\E{divratio}{p-q=d-c,\qquad
+ R(s,c,d)^2=\frac{D(p\mid q)}{sD(c\mid d)+(1-s)D(d\mid c)}.}
+\end{lemma}
+\begin{proof}
+Both $p$ and $q$ are convex combinations of two points of $(0,1)$, with nonnegative weights summing to one. Their lower bounds are the positive minima of those two points, and their upper bounds are their maxima, which are less than one. Each $K$ in the denominator is at least $2$ by Lemma~\ref{lem:Kregular}; their weighted sum is therefore at least $2$.
+Continuity follows from that lemma, continuity of $p,q$, and continuity of division and square root. Direct expansion gives $p-q=d-c$.
+For $c\ne d$, the three differences entering $K$ have the same nonzero square. Cancel it in the quotient. Its numerator is positive because $K(p\mid q)>0$, so squaring the square root in \eqref{eq:main-R} returns the quotient. The original divergence denominator is positive for the same reason.
+\end{proof}
+
+\begin{definition}[Reduced variables]\label{def:reduced}
+Define
+\E{abtu}{a=c+d-1,\qquad b=d-c,\qquad t=1-2s,\qquad u=ta.}
+For $|h|+|b|<1$, define
+\E{kdef}{k(h,b)=K\left(\frac{1+h+b}{2}\,\middle|\,\frac{1+h-b}{2}\right).}
+For $a,b\geq0$, $a+b<1$ and $-1\leq t\leq1$, put
+\E{Bdef}{B=\frac{1+t}{2}k(a,b)+\frac{1-t}{2}k(-a,b).}
+\E{eCdef}{e=\frac{1+t}{2}r(a-b)+\frac{1-t}{2}r(a+b),\qquad
+ C=1-r(u-b)+e.}
+These are functions of the displayed parameters; they are not additional independent variables.
+\end{definition}
+
+\begin{lemma}[Symmetries and the reduced problem]\label{lem:reduction}
+It is enough to prove the interior assertion when $a,b\geq0$, $a+b<1$ and $-1\leq t\leq1$. In that domain,
+\E{coordinates-linear}{2c-1=a-b,\quad 2d-1=a+b,\quad 2p-1=u+b,\quad 2q-1=u-b.}
+Moreover $B>0$, $C>0$, and
+\E{Rreduced}{R^2=\frac{k(u,b)}B.}
+The inequality in Theorem~\ref{thm:main} is exactly $R\leq C$.
+\end{lemma}
+\begin{proof}
+The first symmetry is $(s,c,d)\mapsto(1-s,d,c)$. It replaces $(a,b,t)$ by $(a,-b,-t)$ and $(p,q)$ by $(1-p,1-q)$. It interchanges the two weighted denominator terms. The complement identity for $K$ in Lemma~\ref{lem:Kregular} and evenness of $r$ prove invariance of both sides and of the equality alternatives.
+The second symmetry is $(s,c,d)\mapsto(s,1-c,1-d)$. It replaces $(a,b,t)$ by $(-a,-b,t)$ and again complements $(p,q)$. Each denominator term is unchanged by complementing its two arguments, and the root terms are unchanged. The equality alternatives are again preserved.
+Apply the second symmetry if $a<0$, then the first if $b<0$. The resulting $a,b$ are nonnegative. Since $d<1$ and $a+b=2d-1$, their sum is less than one. Also $s\in[0,1]$ gives $-1\leq t\leq1$.
+All four identities in \eqref{eq:coordinates-linear} follow by expanding \eqref{eq:main-pq} and \eqref{eq:abtu}. The denominator of $R^2$ is $B$: $K(d\mid c)=k(a,b)$, whereas $K(c\mid d)=k(-a,b)$ by complementation. The numerator is $k(u,b)$, proving \eqref{eq:Rreduced}.
+The weights in $B$ are nonnegative and sum to one, so $B\geq2$. Both $r(a-b)$ and $r(a+b)$ are positive; hence $e>0$. Since $|u-b|\leq |u|+b\leq a+b<1$, $1-r(u-b)\geq0$, and therefore $C>0$. Finally, subtracting the root terms in \eqref{eq:main-ineq} gives precisely $R\leq C$.
+\end{proof}
+
+\begin{lemma}[The exceptional interior cases]\label{lem:exceptional}
+If $a=0$ or $t=1$ or $t=-1$, then $C=R=1$. If $b=0$, then
+\E{diagonal}{R=\frac{r(a)}{r(ta)},\qquad
+ C-R=\frac{(1-r(ta))(r(ta)-r(a))}{r(ta)}\geq0.}
+On $b=0$, equality holds exactly when $a=0$, $t=0$, or $|t|=1$.
+\end{lemma}
+\begin{proof}
+If $a=0$, then $u=0$, $B=k(0,b)$, $e=r(b)$ and $r(u-b)=r(b)$, so $C=1$ and \eqref{eq:Rreduced} gives $R=1$.
+If $t=1$, then $u=a$, $B=k(a,b)$ and $e=r(a-b)$; if $t=-1$, then $u=-a$, $B=k(-a,b)$ and $e=r(a+b)=r(u-b)$. Both cases give $C=R=1$.
+For $b=0$, the diagonal definition of $K$ gives $k(h,0)=2/(1-h^2)$. Consequently $B=2/(1-a^2)$ and $R^2=(1-a^2)/(1-t^2a^2)$. Its positive square root is the first expression in \eqref{eq:diagonal}. Also $e=r(a)$; multiplying $C-R$ by $r(ta)>0$ and expanding proves the factorization there. Since $|ta|\leq a<1$, Lemma~\ref{lem:r} gives $0<r(a)\leq r(ta)\leq1$.
+A product of these two nonnegative numerator factors is zero exactly when one factor is zero. The first vanishes exactly when $ta=0$. The second vanishes exactly when $t^2a^2=a^2$, or equivalently $a=0$ or $|t|=1$. Combining these possibilities gives the stated equality alternatives.
+\end{proof}
+
+\section{Algebraic coordinates and exact differentiation}
+\begin{definition}[Positive spatial quantities]\label{def:TS}
+In this section assume $a>0$, $b>0$ and $a+b<1$. Define
+\E{TSdef}{r_1=r(a-b),\qquad r_2=r(a+b),\qquad
+ T=\frac{r_1+r_2}{2},\qquad S=r_1r_2.}
+\end{definition}
+\begin{lemma}[Identities for $T$ and $S$]\label{lem:TS}
+The four quantities in Definition~\ref{def:TS} are positive, and
+\E{TS-first}{r_1=T+\frac{ab}{T},\qquad r_2=T-\frac{ab}{T},\qquad
+ S=T^2-\frac{a^2b^2}{T^2}.}
+\E{TS-second}{1-a^2-b^2=T^2+\frac{a^2b^2}{T^2},\qquad
+ (T^2+a^2)(T^2+b^2)=T^2.}
+\end{lemma}
+\begin{proof}
+The assumptions imply $|a-b|<1$ and $a+b<1$, so $r_1,r_2>0$ by Lemma~\ref{lem:r}; hence $T,S>0$.
+Their squared difference is $[1-(a-b)^2]-[1-(a+b)^2]=4ab$. Since their sum is $2T$, their difference is $2ab/T$. Adding and subtracting proves the first two identities in \eqref{eq:TS-first}; their product gives the third.
+The average of $r_1^2,r_2^2$ is both $1-a^2-b^2$ and $T^2+a^2b^2/T^2$, proving the first part of \eqref{eq:TS-second}. Multiply it by $T^2$ and move the terms $T^2a^2+T^2b^2$ to the other side. The resulting equality is
+$T^4+(a^2+b^2)T^2+a^2b^2=T^2$, which is the second part after factoring.
+\end{proof}
+
+\begin{definition}[The algebraic change of variables]\label{def:vy}
+For the parameters of Definition~\ref{def:TS}, set
+\E{vydef}{v=\frac{a}{T^2+a^2},\qquad y=\frac{b}{T^2+b^2},\qquad
+ z=vy,\quad Z=z^2,\quad Y=y^2,\quad P=1-Z.}
+Define $\rho=\sqrt{1-v^2}$ and $\sigma=\sqrt{1-y^2}$.
+\end{definition}
+\begin{lemma}[Range and inverse formulas]\label{lem:vy}
+One has $0<v,y<1$, $0<z<y<1$, $0<Z<Y<1$, and $\rho,\sigma,P>0$. Furthermore,
+\E{coord-basic}{z=\frac{ab}{T^2},\qquad P=\frac S{T^2},\qquad
+ \rho^2=\frac S{T^2+a^2},\qquad\sigma^2=\frac S{T^2+b^2}.}
+\E{coord-inverse}{a=\frac{v\sigma^2}{P},\qquad b=\frac{y\rho^2}{P},\qquad
+ T=\frac{\rho\sigma}{P}.}
+\E{coord-sums}{a+b=\frac{v+y}{1+vy},\qquad a-b=\frac{v-y}{1-vy},\qquad
+ r_1=\frac{\rho\sigma}{1-z},\qquad r_2=\frac{\rho\sigma}{1+z}.}
+Conversely, for any $0<v,y<1$, the first two formulas in \eqref{eq:coord-inverse} define positive $a,b$ with $a+b<1$, and all the displayed formulas for $r_1,r_2,T,S$ hold for these $a,b$.
+\end{lemma}
+\begin{proof}
+The denominators defining $v,y$ are positive, so $v,y>0$. Expanding $T^2=(1-a^2-b^2+S)/2$ gives
+$T^2+a^2-a=((1-a)^2-b^2+S)/2>0$: the squared difference is positive since $1-a>b>0$. Similarly $T^2+b^2-b=((1-b)^2-a^2+S)/2>0$. This proves $v,y<1$.
+The product identity in \eqref{eq:TS-second} gives $z=ab/T^2$; substitute it in \eqref{eq:TS-first} to get $P=S/T^2$.
+To compute $1-v^2$, observe that
+$(T^2+a^2)-a^2/(T^2+a^2)=T^2-a^2b^2/T^2=S$, where the product identity replaces the reciprocal of $T^2+a^2$ by $(T^2+b^2)/T^2$. Divide by $T^2+a^2$. This gives $1-v^2=S/(T^2+a^2)$; the proof for $y$ is identical with $a,b$ exchanged. Squaring $\rho,\sigma$ is legitimate because $v,y<1$.
+Now $0<v<1$ and $0<y<1$ give $0<z<y<1$ and $0<Z<Y<1$, hence positivity of $P,\rho,\sigma$.
+Substitute \eqref{eq:coord-basic} into $v\sigma^2/P$ and $y\rho^2/P$, and cancel the product $(T^2+a^2)(T^2+b^2)=T^2$. This gives the first two inverse formulas. The same product shows $\rho^2\sigma^2=S^2/T^2$; all factors are positive, so $\rho\sigma=S/T=TP$, giving the third inverse formula.
+Add and subtract those formulas for $a,b$. Their numerators factor as
+$v(1-y^2)+y(1-v^2)=(v+y)(1-vy)$ and
+$v(1-y^2)-y(1-v^2)=(v-y)(1+vy)$.
+Cancel the respective factors of $P=(1-z)(1+z)>0$. The formulas for $r_1,r_2$ follow from \eqref{eq:TS-first}, since $T\pm ab/T=T(1\pm z)$.
+Conversely, define $a,b$ by the stated inverse formulas. They are positive. The formula for their sum follows by the same factorization, and its denominator minus its numerator is $(1-v)(1-y)>0$. Thus $a+b<1$.
+Direct subtraction of squares gives
+$1-((v\mp y)/(1\mp vy))^2=(1-v^2)(1-y^2)/(1\mp vy)^2$.
+Taking the positive square roots proves the two formulas for $r_1,r_2$, their half sum gives $T=\rho\sigma/P$, and their product gives $S=T^2P$. This proves the converse without invoking inverse hyperbolic functions.
+\end{proof}
+
+\begin{lemma}[Logarithms and the integral for $k$]\label{lem:kformula}
+Set $L=\artanh(a+b)-\artanh(a-b)$ and $J=\log(r_1/r_2)$. Then
+\E{LJcoords}{L=2\artanh y,\qquad J=2\artanh z.}
+For $|h|+|b|<1$,
+\E{kintegral}{k(h,b)=\int_{-1}^1\frac{1-\lambda}{1-(h+b\lambda)^2}\dd\lambda.}
+For $a,b>0$, $a+b<1$,
+\E{kformulas}{k(a,b)=\frac{(a+b)L-J}{b^2},\qquad
+ k(-a,b)=\frac{(b-a)L+J}{b^2}.}
+\end{lemma}
+\begin{proof}
+Apply \eqref{eq:artanhadd} to the two expressions for $a\pm b$ in \eqref{eq:coord-sums} and subtract; this gives the formula for $L$. The ratio $r_1/r_2=(1+z)/(1-z)$ gives the formula for $J$ by \eqref{eq:artanhdef} and the logarithm quotient identity.
+In \eqref{eq:Kintegral}, for the two arguments of $k(h,b)$, the interpolated probability is $(1+h+b(2\lambda-1))/2$. Set $\mu=2\lambda-1$. The denominator becomes $(1-(h+b\mu)^2)/4$, the weight becomes $(1-\mu)/2$, and $\dd\lambda=\dd\mu/2$. These factors give exactly \eqref{eq:kintegral}. This affine substitution is also a direct application of the interval integral change of variables in \cite{lib-integral}.
+For the first formula in \eqref{eq:kformulas}, substitute $x=a+b\lambda$; because $b>0$, the integral becomes $b^{-2}\int_{a-b}^{a+b}(a+b-x)/(1-x^2)\dd x$.
+An antiderivative is $(a+b)\artanh x+\tfrac12\log(1-x^2)$: the two derivative terms are $(a+b)/(1-x^2)$ and $-x/(1-x^2)$. Every point of the interval has absolute value less than one. The endpoint logarithmic difference is $\log r_2-\log r_1=-J$, proving the formula by the fundamental theorem.
+Replacing $a$ by $-a$ leaves $L$ unchanged by oddness of $\artanh$ and changes $J$ to $-J$ by evenness of $r$. This proves the second formula.
+\end{proof}
+
+\begin{lemma}[Differentiation with $b,u$ fixed]\label{lem:rawderivatives}
+Fix $b>0$ and $u\in\R$. At $a>0$ with $a+b<1$, substitute $t=u/a$ into the algebraic formulas for $B,e$. Then
+\E{Beexplicit}{B=\frac Lb+\frac{u}{b^2}\left(L-\frac Ja\right),\qquad
+ e=T+\frac{ub}{T}.}
+The derivatives with $b,u$ fixed are
+\E{LJder}{\frac{dL}{da}=\frac{4ab}{S^2},\qquad
+ \frac{dJ}{da}=\frac{2b(1+a^2-b^2)}{S^2}.}
+\E{Tder}{\frac{dT}{da}=-\frac{a(T^2+b^2)}{TS}.}
+\E{Braw}{\frac{dB}{da}=\frac{4a}{S^2}
+ +u\left(\frac{2(a^2+b^2-1)}{abS^2}+\frac{J}{a^2b^2}\right).}
+\end{lemma}
+\begin{proof}
+Insert \eqref{eq:kformulas} into \eqref{eq:Bdef} and collect the coefficients of $L,J$; use $ta=u$. Insert $r_1=T+ab/T$ and $r_2=T-ab/T$ into $e$. These give \eqref{eq:Beexplicit}.
+All formulas are differentiable on the open set $a>0$, $a+b<1$; no hypothesis $|u|\leq a$ is needed for these algebraic identities. In particular no endpoint derivative is being inferred from a formula undefined nearby.
+Using Lemmas~\ref{lem:r} and \ref{lem:artanh} gives
+$dL/da=1/r_2^2-1/r_1^2=(r_1^2-r_2^2)/S^2=4ab/S^2$.
+For $J$, it gives
+$dJ/da=-(a-b)/r_1^2+(a+b)/r_2^2$.
+After multiplication by $S^2$, its numerator is
+$(a+b)[1-(a-b)^2]-(a-b)[1-(a+b)^2]=2b(1+a^2-b^2)$, proving \eqref{eq:LJder}.
+For $T$, differentiate its half-sum definition. Combining denominators gives
+$-[(a-b)r_2+(a+b)r_1]/(2S)$. By \eqref{eq:TS-first}, the numerator in brackets is $2aT+2ab^2/T$, which proves \eqref{eq:Tder}.
+Finally differentiate the first expression in \eqref{eq:Beexplicit}:
+$dB/da=L'/b+(u/b^2)(L'-J'/a+J/a^2)$.
+Inserting \eqref{eq:LJder} yields the first term $4a/S^2$. The two remaining rational terms combine because
+$4a/b-2(1+a^2-b^2)/(ab)=2(a^2+b^2-1)/(ab)$.
+This proves \eqref{eq:Braw} with all differentiations taken at fixed $b,u$.
+\end{proof}
+
+\begin{definition}[Normalized integral quantities]\label{def:MAE}
+For $0<Z<Y<1$ and $P=1-Z$, define
+\E{MAEdef}{M=1+\frac P2 I(Z),\qquad A=P H(Y),\qquad
+ E=P\int_0^1\frac{1-\lambda^2}{(1-Z\lambda^2)(1-Y\lambda^2)}\dd\lambda.}
+The letter $E$ here denotes this real quantity, not the polynomial evaluation map used later.
+\end{definition}
+\begin{lemma}[Identities and bounds for $M,A,E$]\label{lem:MAE}
+The definitions in \eqref{eq:MAEdef} satisfy
+\E{MEidentities}{M=\frac{1+Z-P^2H(Z)}{2Z},\qquad
+ E=P\,\frac{P H(Z)-(1-Y)H(Y)}{Y-Z}.}
+They also satisfy
+\E{MEbounds}{1+\frac P3\leq M\leq1+\frac{P(2+Z)}6,\qquad
+ \frac{2P}{3}\leq E\leq\frac{2+Y}{3}.}
+\end{lemma}
+\begin{proof}
+Use \eqref{eq:Iformula} at $Z>0$ in the definition of $M$; its numerator is $2Z+P-P^2H(Z)=1+Z-P^2H(Z)$.
+For $E$, the difference of the two integrands $P/(1-Z\lambda^2)$ and $(1-Y)/(1-Y\lambda^2)$ is
+$(Y-Z)(1-\lambda^2)/[(1-Z\lambda^2)(1-Y\lambda^2)]$.
+Multiply by $P/(Y-Z)$ and integrate to obtain the second identity. Both denominator factors are at least their positive endpoint values, so all the integrands are continuous.
+The $M$ bounds follow from Lemma~\ref{lem:Ibounds}. For the lower $E$ bound, each denominator factor is at most one, so the integrand is at least $1-\lambda^2$. For its upper bound, $P/(1-Z\lambda^2)\leq1$ since $\lambda^2\leq1$; discard this factor and use $I(Y)\leq(2+Y)/3$. Integral comparison proves both inequalities.
+\end{proof}
+
+\begin{lemma}[The exact normalized derivative identity]\label{lem:Videntity}
+Assume additionally $|u|\leq a$, and set $w=ub/T^2=tz$. Define
+\E{XiVdef}{\Xi=\frac CT=1+w+\frac{1-r(u-b)}T,\qquad
+ V=(1-wM)\Xi-(1-w)(A-wE).}
+Then $|w|\leq z<1$, $\Xi\geq1+w>0$, and
+\E{normalized-derivatives}{\frac{dB}{da}=\frac{4a}{S^2}(1-wM),\qquad
+ \frac{de}{da}=-\frac{a(T^2+b^2)}{TS}(1-w).}
+\E{Bnormalized}{\frac{P(T^2+b^2)}2 B=A-wE.}
+Consequently, with $b,u$ fixed,
+\E{Videntity}{\frac{d}{da}(C^2B)=\frac{4aTC}{S^2}\,V.}
+\end{lemma}
+\begin{proof}
+Lemma~\ref{lem:vy} gives $ab=T^2z$, so $ub/T^2=(u/a)z=tz$. Since $|u|\leq a$, $|w|\leq z<1$. The expression for $e$ in \eqref{eq:Beexplicit} gives $e/T=1+w$; this proves the expression for $\Xi$. The other term there is nonnegative by Lemma~\ref{lem:r}, proving its asserted lower bound.
+In \eqref{eq:Braw}, multiply by $S^2/(4a)$. Use $S=T^2P$, $ab=T^2z$, $1-a^2-b^2=T^2(1+Z)$, and $J=2zH(Z)$. The result is
+$1-w(1+Z)/(2Z)+wP^2H(Z)/(2Z)=1-wM$, by \eqref{eq:MEidentities}. This proves the first derivative identity. Differentiating $e=T+ub/T$ gives $e'=T'(1-ub/T^2)$, which is the second identity.
+For \eqref{eq:Bnormalized}, first $T^2+b^2=b/y$ by the definition of $y$. Also $by=(Y-Z)/P$ by \eqref{eq:coord-inverse}, and hence $u/b=w(1-Y)/(Y-Z)$. Insert $L=2yH(Y)$ and $J=2zH(Z)$ into \eqref{eq:Beexplicit} and multiply by $P(T^2+b^2)/2$. The three terms become
+$P H(Y)$, $wP(1-Y)H(Y)/(Y-Z)$, and $-wP^2H(Z)/(Y-Z)$, respectively. Their sum is $A-wE$ by \eqref{eq:MEidentities}.
+Because $u-b$ is fixed, $dC/da=de/da$. The product rule gives $d(C^2B)/da=C(CB'+2Be')$. Insert the two derivative formulas. Since $S=T^2P$, the coefficient needed to factor $4aTC/S^2$ from the $2Be'$ term is exactly $P(T^2+b^2)B/2$. Apply \eqref{eq:Bnormalized}. This gives \eqref{eq:Videntity}. Every division used here has positive denominator by Lemma~\ref{lem:vy} and $a,b>0$.
+\end{proof}
+
+\section{Lower bounds for the normalized derivative}
+\begin{definition}[The two elementary lower bounds]\label{def:Phi}
+Under the hypotheses of Lemma~\ref{lem:Videntity}, set
+\E{boundconstants}{M_-=1+\frac P3,\qquad M_+=1+\frac{P(2+Z)}6,\qquad
+ A_*=P\left(\frac{7+Y}{15}+\frac8{15\sigma}\right).}
+Define
+\E{Phiminus}{\Phi_-=(1-wM_-)\Xi-(1-w)\left(A_*-w\frac{2+Y}{3}\right).}
+\E{Phiplus}{\Phi_+=(1-wM_+)\Xi-(1-w)\left(A_*-w\frac{2P}{3}\right).}
+\end{definition}
+\begin{lemma}[Comparison with $V$]\label{lem:Phi}
+If $t\leq0$, then $V\geq\Phi_-$. If $t\geq0$, then $V\geq\Phi_+$.
+\end{lemma}
+\begin{proof}
+Expand $V$ as $\Xi-wM\Xi-(1-w)A+w(1-w)E$. Lemma~\ref{lem:Hbounds} gives $A\leq A_*$, and $1-w>0$, so replacing $A$ by $A_*$ decreases this expression.
+If $t\leq0$, then $w\leq0$. The coefficient $-w\Xi$ of $M$ is nonnegative, so replace $M$ by its lower bound $M_-$. The coefficient $w(1-w)$ of $E$ is nonpositive, so replace $E$ by its upper bound $(2+Y)/3$. Both replacements decrease or preserve the expression. This gives $V\geq\Phi_-$.
+If $t\geq0$, these two coefficient signs are reversed. Replace $M$ by its upper bound $M_+$ and $E$ by its lower bound $2P/3$. This gives $V\geq\Phi_+$. At $w=0$, both coefficients vanish, so either argument includes the interface.
+\end{proof}
+
+\begin{definition}[The boundary-region lower bound]\label{def:Psi}
+Define
+\E{Psidef}{\Psi=(1-wM_+)\Xi-P(1-w)^2(1+Z/3)
+ -(1-w)P(Y-Z+w\sigma^2)\left(\frac1{2\rho\sigma}-\frac16\right).}
+\end{definition}
+\begin{lemma}[The sharper comparison]\label{lem:Psi}
+If $v,y\geq4/5$ and $z\leq t\leq1$, then $V\geq\Psi$.
+\end{lemma}
+\begin{proof}
+In this region $Z=v^2y^2\geq256/625>1/3$, and $w=tz\geq z^2=Z$. Thus $0<Z\leq w<1$, $1-w\leq P$ and $\Xi\geq1+w\geq1+Z$. Define the following coefficient:
+\E{Gamma}{\Gamma=P\left(\frac{wP\Xi}{2Z}-(1-w)^2\right)
+ \geq\frac{P^2(3Z-1)}2>0.}
+Indeed $w\Xi/(2Z)\geq(1+Z)/2$, and $(1-w)^2\leq P^2$; substitution gives the middle lower bound because $(1+Z)/2-P=(3Z-1)/2$. This proves every sign in \eqref{eq:Gamma}.
+Write $\Delta=H(Y)-H(Z)$ within this proof. The second identity in \eqref{eq:MEidentities}, after replacing $H(Y)$ by $H(Z)+\Delta$, gives
+\E{AEsplit}{A-wE=P(1-w)H(Z)+P\left(1+\frac{w\sigma^2}{Y-Z}\right)\Delta.}
+For verification, the coefficient of $H(Z)$ before simplification is
+$P+wP\sigma^2/(Y-Z)-wP^2/(Y-Z)$; since $P-\sigma^2=Y-Z$, it is $P(1-w)$. The coefficient of $\Delta$ is as displayed.
+The first identity in \eqref{eq:MEidentities} also gives
+$1-wM=1-w-wP/(2Z)+wP^2H(Z)/(2Z)$. Therefore
+\E{Vsplit}{V=\left(1-w-\frac{wP}{2Z}\right)\Xi+\Gamma H(Z)
+ -(1-w)P\left(1+\frac{w\sigma^2}{Y-Z}\right)\Delta.}
+This follows by inserting \eqref{eq:AEsplit} and collecting the two $H(Z)$ terms; their coefficient is precisely \eqref{eq:Gamma}.
+The factor multiplying $-\Delta$ is positive. Lemma~\ref{lem:Hdifference} applies, and $P=1-v^2y^2\geq1-v^2=\rho^2$, so $\sqrt P\geq\rho>0$. Hence
+$\Delta\leq(Y-Z)(1/(2\rho\sigma)-1/6)$.
+Use this upper bound in the negative term of \eqref{eq:Vsplit}, and use $H(Z)\geq1+Z/3$ in its positive $\Gamma$ term. The resulting coefficient of $\Xi$ simplifies by
+\E{Psicoefficient}{1-w-\frac{wP}{2Z}+\frac{wP^2}{2Z}(1+Z/3)
+ =1-w\left(1+\frac{P(2+Z)}6\right).}
+To check this identity, cancel $1-w$, factor $wP/(2Z)$ from the remaining terms and use
+$P(1+Z/3)-1=-Z(2+Z)/3$.
+The other two terms are exactly those in \eqref{eq:Psidef}, proving $V\geq\Psi$.
+\end{proof}
+
+\section{Finite integer algebra: definitions and soundness}
+This section specifies the computation that will justify the remaining inequalities. It involves no real-number computation. All inputs are integers, triples of natural numbers, or finite lists. Rational point evaluations will also be reduced to integer computations.
+
+\begin{definition}[A finite representation of polynomials]\label{def:poly}
+An exponent is a triple $e=(e_1,e_2,e_3)\in\N^3$. A polynomial is a finite list of pairs $(e,c)$ with $c\in\Zz$. Its real interpretation is
+\E{polyeval}{\ev(p;x)=\sum_{(e,c)\in p}c\,x_1^{e_1}x_2^{e_2}x_3^{e_3}.}
+The integers in this formula are cast to $\R$. Repeated exponents are permitted in an input list; the normalized representation combines them, deletes zero coefficients and orders the exponents in decreasing lexicographic order. The zero polynomial is the empty list. The constant $1$ is the singleton $[((0,0,0),1)]$; the variables $j,k,\tau$ are the singletons with exponent $(1,0,0)$, $(0,1,0)$ and $(0,0,1)$, respectively, and coefficient $1$. A coordinate degree bound is the maximum exponent in that coordinate, with value zero for the empty list.
+\end{definition}
+
+\begin{specification}[Normalization and arithmetic]\label{spec:polyops}
+The following are terminating algorithms on finite lists.
+To insert a term $(e,c)$ in a normalized list: discard it if $c=0$; insert it at the head if the list is empty or its exponent is larger than the head exponent; if the exponents agree, add coefficients and discard the resulting head if their sum is zero; otherwise retain the head and recurse on the tail. Normalize a list by inserting its terms one at a time into the empty list.
+Addition normalizes the concatenation of the two lists. Negation negates all coefficients. Multiplication normalizes the list of all pairs $(e+f,cd)$ with $(e,c)$ in the first list and $(f,d)$ in the second. Powers are computed by natural-number recursion, starting from the constant polynomial $1$. Integer scalar multiplication multiplies every coefficient by the scalar and normalizes.
+These definitions, including the order of enumeration, determine exact finite computations; no map, hash or external algebra package is part of their meaning.
+\end{specification}
+
+\begin{lemma}[Soundness of polynomial arithmetic]\label{lem:polyops}
+Normalization preserves \eqref{eq:polyeval}; addition, negation, multiplication, powers and integer scaling have their usual real interpretations. In particular,
+\E{polymul}{\ev(pq;x)=\ev(p;x)\ev(q;x).}
+Every exponent in a normalized sum is bounded by the coordinatewise maximum of the input degree bounds; every exponent in a product is bounded by their coordinatewise sum. Equality of normalized lists implies equality of their real evaluations at every real triple.
+\end{lemma}
+\begin{proof}
+For insertion, use induction on the target list. Inserting at the head simply adds the new monomial. If the exponent agrees with the head, the identity $(c+d)x^e=cx^e+dx^e$ combines the two terms, including the zero-coefficient case. Otherwise the induction hypothesis applies to the tail while the head is unchanged. Induction on the input list proves that normalization preserves evaluation.
+Concatenation gives addition of the two finite sums, and coefficientwise negation and scaling give their corresponding operations. For multiplication, distribute the product of the two finite sums and use $x_i^{e_i}x_i^{f_i}=x_i^{e_i+f_i}$ for each of the three coordinates. The resulting terms are exactly the list in Specification~\ref{spec:polyops}; normalization preserves its value. This proves \eqref{eq:polymul}. Natural-number induction proves the claim for powers.
+Insertion only deletes terms or combines identical exponents, so it does not increase a coordinate bound. Products add exponents, giving the stated bound. Finally, equal lists give identical finite sums in \eqref{eq:polyeval}.
+\end{proof}
+
+\begin{specification}[Exact division by reconstruction]\label{spec:divide}
+To produce a proposed quotient of nonzero normalized integer polynomials $p,q$, use the following bounded procedure. Start with remainder $p$ and quotient $0$. At each step, if the remainder is zero, stop. Otherwise let $(e,c)$ and $(f,d)$ be the leading terms of the remainder and divisor. Fail unless $f_i\leq e_i$ for all three coordinates and $d$ divides $c$. Replace the quotient by itself plus $(e-f,c/d)$, and the remainder by itself minus $(e-f,c/d)q$. Normalize after each operation. Allow at most $100000$ steps per division. Failure or exhausted fuel is a failed certificate, never a theorem.
+After any successful stop, \emph{independently check} equality of the normalized product of the proposed quotient with $q$ and the original $p$.
+Alternatively, any proposed quotient can be supplied as a literal finite list and only this last multiplication check is needed. Both routes have the same proof obligation.
+\end{specification}
+
+\begin{lemma}[Division soundness]\label{lem:division}
+If the reconstruction check in Specification~\ref{spec:divide} succeeds with quotient $h$, then for every real triple $x$,
+\E{division-sound}{\ev(p;x)=\ev(q;x)\ev(h;x).}
+If $\ev(q;x)>0$, $\ev(p;x)$ and $\ev(h;x)$ have the same sign.
+\end{lemma}
+\begin{proof}
+The successful check is equality of two finite lists. Apply Lemma~\ref{lem:polyops} to that equality and to the product; this gives \eqref{eq:division-sound}. Multiplication by a positive real number preserves and reflects strict positivity and nonnegativity. No correctness theorem about long division, nor any assertion about its eventual success on arbitrary inputs, is needed. Bounded recursion on the fuel supplies termination; the reconstruction check alone supplies soundness.
+\end{proof}
+
+\begin{definition}[Positive-denominator rational expressions]\label{def:rational}
+In variables $(j,k,\tau)$, put $A_0=1+j^2$ and $B_0=1+k^2$. Represent a rational expression by a tuple $(p,d,a,b)$, where $p$ is an integer polynomial, $d$ is a positive integer and $a,b$ are natural numbers. Its meaning is
+\E{rational-eval}{\frac{\ev(p;j,k,\tau)}{d A_0^a B_0^b}.}
+The denominator is positive for every real $j,k,\tau$. Constants and the three variables have denominator $1$.
+\end{definition}
+
+\begin{specification}[Rational arithmetic without a fraction oracle]\label{spec:ratops}
+Negation negates $p$. Multiplication multiplies numerators and $d$'s and adds the two respective exponents. Division by a positive integer $n$ multiplies $d$ by $n$. Powers use natural-number recursion.
+To add $(p_1,d_1,a_1,b_1)$ and $(p_2,d_2,a_2,b_2)$, set $a=\max(a_1,a_2)$, $b=\max(b_1,b_2)$, and use denominator $d_1d_2A_0^aB_0^b$ and numerator
+\E{ratadd}{d_2p_1 A_0^{a-a_1}B_0^{b-b_1}
+       +d_1p_2 A_0^{a-a_2}B_0^{b-b_2}.}
+This uses no greatest common divisor and no least common multiple.
+To express $(p,d,a,b)$ with prescribed positive denominator $d_*A_0^{a_*}B_0^{b_*}$, put $a'=\max(a,a_*)$ and $b'=\max(b,b_*)$. Use exact division by reconstruction to find $F$ satisfying
+\E{rational-convert}{F\,d A_0^{a'-a_*}B_0^{b'-b_*}
+ =p\,d_* A_0^{a'-a}B_0^{b'-b}.}
+All products and equality checks here are integer polynomial computations.
+\end{specification}
+
+\begin{lemma}[Rational-expression soundness]\label{lem:rational}
+Specification~\ref{spec:ratops} preserves the real meaning \eqref{eq:rational-eval}. If \eqref{eq:rational-convert} is checked, then $F/(d_*A_0^{a_*}B_0^{b_*})$ has that same meaning.
+\end{lemma}
+\begin{proof}
+For addition, multiply each original fraction by the missing positive factors to reach the common denominator. The numerators are precisely the two terms of \eqref{eq:ratadd}, and Lemma~\ref{lem:polyops} justifies their polynomial evaluation. Negation, multiplication, scalar division and powers follow by the same lemma and the laws of an ordered field; all denominators are positive. These arguments also give a structural induction proof for any expression constructed from the operations.
+For conversion, divide \eqref{eq:rational-convert} by the positive product
+$d d_* A_0^{a'}B_0^{b'}$. The two sides become $F/(d_*A_0^{a_*}B_0^{b_*})$ and $p/(dA_0^aB_0^b)$ respectively. Lemma~\ref{lem:division} justifies the checked polynomial identity.
+\end{proof}
+
+\begin{definition}[Integer Bernstein coefficients]\label{def:bernstein}
+Let $p$ have coefficients $p_\alpha$, zero outside a finite coordinate box, and let $n=(n_1,n_2,n_3)$ be any verified coordinatewise degree bound. For $0\leq\beta\leq n$ define
+\E{bernstein-coeff}{b_\beta=\sum_{0\leq\alpha\leq\beta}p_\alpha
+       \prod_{i=1}^3\binom{n_i-\alpha_i}{\beta_i-\alpha_i}.}
+These are integers, not coefficients in the binomial-normalized Bernstein basis.
+\end{definition}
+
+\begin{lemma}[Bernstein identity and strict positivity]\label{lem:bernstein}
+For all real triples $x$,
+\E{bernstein-id}{\ev(p;x)=\sum_{0\leq\beta\leq n}b_\beta
+       \prod_{i=1}^3x_i^{\beta_i}(1-x_i)^{n_i-\beta_i}.}
+If all $b_\beta\geq0$, then $\ev(p;x)\geq0$ for $x\in[0,1]^3$. If at such a point one index $\beta$ has $b_\beta>0$ and its displayed basis product is positive, then $\ev(p;x)>0$.
+\end{lemma}
+\begin{proof}
+For natural numbers $0\leq a\leq n$, expand
+$x^a[x+(1-x)]^{n-a}=x^a$ by the binomial theorem. Its term with $x$ exponent $b$ is
+$\binom{n-a}{b-a}x^b(1-x)^{n-b}$ for $a\leq b\leq n$.
+The binomial theorem itself follows by induction on $n-a$: multiply the previous expansion by $x+(1-x)$ and combine adjacent terms using Pascal's identity. Thus this is a finite identity over the integers, also valid after real evaluation.
+Apply it in the three coordinates to each monomial of $p$. Distribute the product and collect the coefficient of the basis product indexed by $\beta$. It is exactly \eqref{eq:bernstein-coeff}, proving \eqref{eq:bernstein-id}. All exponents subtracted here are nonnegative by the displayed index restrictions, so no truncated subtraction is being interpreted as an integer difference.
+On the cube, every factor $x_i$ and $1-x_i$ is nonnegative. Each summand is therefore nonnegative, and a strictly positive summand makes the finite sum strictly positive. This includes coordinate faces and the convention $0^0=1$ for a zero exponent.
+\end{proof}
+
+\begin{specification}[Three one-coordinate transforms]\label{spec:bernstein-compute}
+Start with the coefficient array of $p$ padded by zeros to the full box $0\leq e\leq n$. For coordinate $i=1$, then $i=2$, then $i=3$, replace the array $c$ by the array whose entry at $\beta$ is
+\E{bernstein-pass}{\sum_{a=0}^{\beta_i}
+ c_{(\beta_1,\ldots,\beta_{i-1},a,\beta_{i+1},\ldots,\beta_3)}
+ \binom{n_i-a}{\beta_i-a}.}
+All loops run over explicitly bounded natural numbers. Compute binomial coefficients either with mathlib's natural-number function or with Pascal recursion and its proved equality to that function.
+\end{specification}
+
+\begin{lemma}[Soundness of the three transforms]\label{lem:bernstein-compute}
+After the three passes in Specification~\ref{spec:bernstein-compute}, the entries are exactly the integers in \eqref{eq:bernstein-coeff}.
+\end{lemma}
+\begin{proof}
+After the first pass the entry at $\beta$ is the sum over $\alpha_1\leq\beta_1$ with the first binomial factor; the other two input indices still equal $\beta_2,\beta_3$. Substituting this expression into the second pass adds the independent sum over $\alpha_2\leq\beta_2$ and its binomial factor. Substituting again in the third pass adds the independent sum over $\alpha_3\leq\beta_3$. Distributing finite sums yields exactly \eqref{eq:bernstein-coeff}. This is also an induction proof on the number of processed coordinates. No sum is truncated except at its prescribed bound.
+\end{proof}
+
+\begin{lemma}[Rational point signs using integers only]\label{lem:homogeneous-eval}
+Suppose $n$ bounds the degrees of $p$, and $x_i=r_i/s_i$ with integers $r_i$ and positive integers $s_i$. Define the integer
+\E{homogeneous-eval}{N(p;r,s)=\sum_{0\leq e\leq n}p_e
+                   \prod_{i=1}^3 r_i^{e_i}s_i^{n_i-e_i}.}
+Then
+\E{homogeneous-id}{N(p;r,s)=\left(\prod_{i=1}^3s_i^{n_i}\right)
+            \ev\left(p;\frac{r_1}{s_1},\frac{r_2}{s_2},\frac{r_3}{s_3}\right).}
+Thus the sign of the evaluation is exactly the sign of $N(p;r,s)$.
+\end{lemma}
+\begin{proof}
+For each monomial, $e_i\leq n_i$ and $s_i\ne0$ give
+$s_i^{n_i}(r_i/s_i)^{e_i}=r_i^{e_i}s_i^{n_i-e_i}$. Multiply these three identities, multiply by $p_e$ and sum over the finite box. This proves \eqref{eq:homogeneous-id}. Its multiplier is positive, which proves the sign assertion. Hence no rational reduction or numerical approximation is required even for the seven center evaluations.
+\end{proof}
+
+\begin{specification}[Three polynomial substitutions]\label{spec:substitutions}
+For a monomial substitution with exponent images $m_1,m_2,m_3\in\N^3$, replace each exponent $e$ by $e_1m_1+e_2m_2+e_3m_3$ and normalize.
+For a half-interval substitution in coordinate $i$, let $n_i$ be that polynomial's current coordinate degree. Replacing $x_i$ by $(x_i+\delta)/2$, with $\delta=0$ or $1$, and multiplying by $2^{n_i}$ replaces a monomial $c x^e$ by the sum over $0\leq h\leq e_i$ with coefficient
+\E{half-coeff}{c\,2^{n_i-e_i}\binom{e_i}{h}\delta^{e_i-h},}
+and exponent $e$ with its $i$th coordinate replaced by $h$. For $\delta=0$, only $h=e_i$ survives.
+Finally, for polynomials $D,U$ and a polynomial $p=\sum_{i=0}^n p_i(j,k)\tau^i$, define the cleared rational substitution by
+\E{tau-clear}{\mathcal T_{U,D}(p)=\sum_{i=0}^n p_i(j,k)U(j,k,\tau)^iD(j,k,\tau)^{n-i}.}
+Here $n$ is the current $\tau$ degree. All results are normalized using Specification~\ref{spec:polyops}.
+\end{specification}
+\begin{lemma}[Substitution soundness]\label{lem:substitutions}
+Monomial substitutions have their indicated evaluation. The half-interval operation evaluates to $2^{n_i}$ times the polynomial evaluated at the indicated half-interval substitution. If $\ev(D;x)\ne0$, then
+\E{tau-clear-sound}{\ev(\mathcal T_{U,D}(p);j,k,\tau)
+ =\ev(D;j,k,\tau)^n\,
+   \ev\left(p;j,k,\frac{\ev(U;j,k,\tau)}{\ev(D;j,k,\tau)}\right).}
+\end{lemma}
+\begin{proof}
+For a monomial, replacing each variable by its specified monomial gives exponent $\sum_i e_i m_i$, by the rules for products and powers. Sum over all input terms and apply Lemma~\ref{lem:polyops}.
+For the half-interval operation, expand $(x_i+\delta)^{e_i}$ by the binomial theorem and multiply its denominator $2^{-e_i}$ by $2^{n_i}$. This produces exactly \eqref{eq:half-coeff}. The other two coordinates are unchanged. This proves the asserted identity after summation and normalization.
+For \eqref{eq:tau-clear-sound}, the $i$th term on its right is $p_i U^iD^{n-i}$, since $D\ne0$ and $i\leq n$. Summing these identities gives the left side by \eqref{eq:tau-clear} and Lemma~\ref{lem:polyops}. In the applications $D>0$, so all clearing multipliers preserve signs.
+\end{proof}
+
+\section{The rational expressions and the seven certificates}
+\begin{lemma}[Rational parametrization of the two roots]\label{lem:rational-param}
+For every $0<v<1$, put $\rho=\sqrt{1-v^2}$ and $j=v/(1+\rho)$. Then $0<j<1$ and
+\E{rational-param}{v=\frac{2j}{1+j^2},\qquad\rho=\frac{1-j^2}{1+j^2}.}
+Conversely, these formulas hold with $\rho=\sqrt{1-v^2}$ for every $0<j<1$ and $v=2j/(1+j^2)$. Also $v\leq4/5$ exactly when $j\leq1/2$, and $v\geq4/5$ exactly when $j\geq1/2$.
+\end{lemma}
+\begin{proof}
+One has $0<\rho<1$ and $0<v<1<1+\rho$, so $0<j<1$. The identity $v^2=1-\rho^2$ gives
+$1+j^2=2/(1+\rho)$ and $1-j^2=2\rho/(1+\rho)$, by multiplication by $(1+\rho)^2$. These identities prove \eqref{eq:rational-param}.
+Conversely, $2j>0$ and $1+j^2-2j=(1-j)^2>0$ give $0<v<1$. Squaring the proposed $\rho$ gives $1-v^2$, since $(1+j^2)^2-4j^2=(1-j^2)^2$, and the proposed $\rho$ is positive. The positive square-root characterization proves it is the required root.
+Finally,
+$v-4/5=2(2j-1)(2-j)/[5(1+j^2)]$ by expansion. All factors other than $2j-1$ are positive for $0<j<1$. This gives both threshold equivalences, including equality.
+\end{proof}
+
+\begin{definition}[Three rational expressions]\label{def:FKQ}
+Choose a case $-$, $+$, or $b$. Take $\varepsilon=-1$ in case $-$ and $\varepsilon=1$ in the other two cases. For $0<j,k<1$ and $0\leq\tau\leq1$, define
+\E{rational-vars}{v=\frac{2j}{1+j^2},\quad y=\frac{2k}{1+k^2},\quad
+ \rho=\frac{1-j^2}{1+j^2},\quad\sigma=\frac{1-k^2}{1+k^2}.}
+Define $z=vy$, $Z=z^2$, $Y=y^2$, $P=1-Z$, $t=\varepsilon\tau$, $w=\varepsilon\tau z$, and $a,b$ by \eqref{eq:coord-inverse}. Use $m=M_-$ in case $-$ and $m=M_+$ otherwise, with the explicit rational formulas in \eqref{eq:boundconstants}. Put
+\E{KQdef}{\mathcal K=1-wm,\qquad
+ \mathcal Q=P^2-(\varepsilon\tau v\sigma^2-y\rho^2)^2.}
+In cases $-$ and $+$, use $E_*=(2+Y)/3$ and $E_*=2P/3$, respectively, and define
+\E{Fpm}{\mathcal F=\mathcal K[P+(1+w)\rho\sigma]
+ -(1-w)\left(\frac{P\rho[\sigma(7+Y)+8]}{15}-wE_*\rho\sigma\right).}
+In case $b$, instead define
+\E{Fb}{\mathcal F=\mathcal K[P+(1+w)\rho\sigma]-P\rho\sigma(1-w)^2(1+Z/3)
+ -(1-w)P(Y-Z+w\sigma^2)(1/2-\rho\sigma/6).}
+All these expressions can be built using only the rational operations of Specification~\ref{spec:ratops}.
+\end{definition}
+
+\begin{lemma}[Removal of the remaining square root]\label{lem:remove-root}
+In Definition~\ref{def:FKQ}, $\mathcal Q>0$. In cases $-$, $+$ and $b$, respectively,
+\E{rational-lower}{\rho\sigma\Phi_-=\mathcal F-\mathcal K\sqrt{\mathcal Q},\qquad
+ \rho\sigma\Phi_+=\mathcal F-\mathcal K\sqrt{\mathcal Q},\qquad
+ \rho\sigma\Psi=\mathcal F-\mathcal K\sqrt{\mathcal Q}.}
+Each identity is used only for its stated case. If $\mathcal F>0$ and $\mathcal F^2-\mathcal K^2\mathcal Q>0$, the corresponding lower bound is strictly positive, without any sign assumption on $\mathcal K$.
+\end{lemma}
+\begin{proof}
+Lemma~\ref{lem:rational-param} and the converse in Lemma~\ref{lem:vy} give $a,b>0$, $a+b<1$ and $\rho,\sigma,P>0$. With $u=ta$, the value $x=u-b$ is $(\varepsilon\tau v\sigma^2-y\rho^2)/P$. Since $|t|\leq1$, $|x|\leq a+b<1$. Therefore $\mathcal Q=P^2(1-x^2)>0$ and $\sqrt{\mathcal Q}=P r(x)$, both sides being positive and having the same square. The expression for $\Xi$ becomes
+$1+w+(P-\sqrt{\mathcal Q})/(\rho\sigma)$.
+Insert it into \eqref{eq:Phiminus} or \eqref{eq:Phiplus} and multiply by $\rho\sigma$. The identity
+$\rho\sigma A_*=P\rho[\sigma(7+Y)+8]/15$ gives exactly \eqref{eq:Fpm} minus $\mathcal K\sqrt{\mathcal Q}$. For \eqref{eq:Psidef}, the last factor after multiplication becomes $1/2-\rho\sigma/6$, giving \eqref{eq:Fb}. This proves \eqref{eq:rational-lower}.
+For the final claim, $|\mathcal K|\sqrt{\mathcal Q}\geq0$ has square $\mathcal K^2\mathcal Q$. Since $\mathcal F>0$, the strict squared inequality implies $\mathcal F>|\mathcal K|\sqrt{\mathcal Q}$. Otherwise monotonicity of squaring nonnegative numbers would contradict that inequality. Since $|\mathcal K|\geq\mathcal K$, the difference in \eqref{eq:rational-lower} is positive. Divide by $\rho\sigma>0$.
+\end{proof}
+
+\begin{definition}[Base integer polynomials]\label{def:basepoly}
+Use the rational-expression algorithm of Specification~\ref{spec:ratops} to construct $\mathcal F,\mathcal K,\mathcal Q$ directly from Definition~\ref{def:FKQ}. Set $A_0=1+j^2$, $B_0=1+k^2$ and prescribe the denominators
+\E{denominators}{d_-=15A_0^5B_0^6,\qquad d_+=15A_0^7B_0^7,\qquad
+ d_b=3A_0^7B_0^7.}
+For each case, use the reconstruction-checked conversion \eqref{eq:rational-convert} to obtain integer polynomials $F_\varepsilon,H_\varepsilon$ representing $\mathcal F$ with denominator $d_\varepsilon$ and $\mathcal F^2-\mathcal K^2\mathcal Q$ with denominator $d_\varepsilon^2$. The subscript $b$ is used instead of $\varepsilon$ in the boundary case.
+There are six such conversions. Implement each generator as an option-valued total function, and use the empty polynomial as the default value for a failed result when defining its named output. The required checker explicitly demands success before accepting any conversion or division identity. The finite verification below includes those success checks; no existence of an integer numerator with these particular denominators is assumed.
+\end{definition}
+
+\begin{definition}[Positive factors and substitution maps]\label{def:charts}
+Define the integer polynomials
+\E{chartfactors}{D_0=(1+j^2)(1+k^2),\quad N_0=4jk,\quad
+ P_-=D_0-N_0,\quad P_+=D_0+N_0,\quad P_0=P_-P_+.}
+The seven maps $\chi$ from new variables $(j,k,\tau)$ to the old variables are specified in the following table. In P3 and B1 the symbol $z_0$ is $4j_0k_0/[(1+j_0^2)(1+k_0^2)]$ evaluated at the first two output coordinates $(j_0,k_0)$ of that row, not at the untransformed coordinates.
+\begin{center}
+\begin{tabular}{@{}llll@{}}
+\toprule
+Map & Base & $(j_0,k_0,\tau_0)=\chi(j,k,\tau)$ & Final monomial divisor\\
+\midrule
+N1 & $H_-$ & $(kj,k,\tau)$ & $k^2$\\
+N2 & $H_-$ & $(j,jk\tau,\tau)$ & $j^2\tau^2$\\
+N3 & $H_-$ & $(j,jk,k\tau)$ & $j^2k^2$\\
+P1 & $H_+$ & $(j/2,k,\tau)$ & $1$\\
+P2 & $H_+$ & $((1+j)/2,k/2,\tau)$ & $1$\\
+P3 & $H_+$ & $(j,k,z_0\tau)$ & $k^2$\\
+B1 & $H_b$ & $((1+j)/2,(1+k)/2,z_0+(1-z_0)\tau)$ & $1$\\
+\bottomrule
+\end{tabular}
+\refstepcounter{table}\label{tab:charts}\par\smallskip
+\small Table \thetable. Definitions of the seven substitution maps.
+\end{center}
+\end{definition}
+
+\begin{lemma}[Positivity of the removed nonmonomial factors]\label{lem:chartfactors}
+For $0<j,k<1$, all of $A_0,B_0,D_0,P_-,P_+,P_0$ are positive and $z=N_0/D_0\in(0,1)$.
+\end{lemma}
+\begin{proof}
+The first three are products or sums of positive numbers. Expansion gives
+\E{Pminus-squares}{P_-=(j-k)^2+(1-jk)^2.}
+Both sides equal $1+j^2+k^2+j^2k^2-4jk$, proving the identity. Since $jk<1$, its second square is positive. Also $P_+=D_0+4jk>0$, so $P_0>0$. Finally $N_0>0$ and $D_0-N_0=P_->0$ prove $0<N_0/D_0<1$.
+\end{proof}
+
+\begin{specification}[The seven transformed integer polynomials]\label{spec:charts}
+Begin with the base polynomial indicated in Table~\ref{tab:charts}.
+For P1, P2, P3 and B1, first divide that base by $P_0$, using Specification~\ref{spec:divide}.
+For N1, N2 and N3, apply the monomial substitutions in the table using Specification~\ref{spec:substitutions}.
+For P1, apply the lower half-interval substitution in $j$. For P2, apply the upper half-interval substitution in $j$, then the lower one in $k$.
+For P3, use \eqref{eq:tau-clear} with $D=D_0$ and $U=N_0\tau$.
+For B1, \emph{first} use \eqref{eq:tau-clear} with $D=D_0$ and $U=N_0+P_-\tau$, \emph{then} divide by $P_-^2$, and only \emph{then} apply the upper half-interval substitution in $j$ followed by that in $k$.
+In every row divide finally by its listed monomial, including the trivial divisor $1$. Denote the seven resulting integer polynomials by $H_{\mathrm{N1}},\ldots,H_{\mathrm{B1}}$.
+All polynomial divisions must pass reconstruction. Every half-interval degree is the degree of its current input, and every rational substitution uses that input's current $\tau$ degree. This fixes the positive integer scaling factors unambiguously.
+\end{specification}
+
+\begin{lemma}[Complete substitution coverage]\label{lem:coverage}
+Every $(j_0,k_0,\tau_0)$ with $0<j_0,k_0<1$ and $0\leq\tau_0\leq1$ is represented by N1, N2 or N3. The same domain is covered by P1, P2, P3 and B1, with the respective additional restrictions $j_0\leq1/2$, or $j_0\geq1/2$ and $k_0\leq1/2$, or $\tau_0\leq z_0$, or $j_0,k_0\geq1/2$ and $\tau_0\geq z_0$. Each representing new triple lies in $[0,1]^3$.
+\end{lemma}
+\begin{proof}
+For the negative rows, if $j_0\leq k_0$, use N1 with new parameters $(j_0/k_0,k_0,\tau_0)$. All coordinates are in the unit interval and the table gives the original triple.
+Otherwise $k_0\leq j_0$. If $k_0\leq j_0\tau_0$, then $\tau_0>0$ because $k_0>0$; use N2 with $(j_0,k_0/(j_0\tau_0),\tau_0)$. If instead $j_0\tau_0\leq k_0$, use N3 with $(j_0,k_0/j_0,j_0\tau_0/k_0)$. Positivity of $j_0,k_0$ justifies both quotients, and the case inequalities give their upper bounds by one. Substituting these expressions verifies each output coordinate. Ties may be assigned to either case, so interfaces are included.
+For the positive rows, when $j_0\leq1/2$, use P1 with $(2j_0,k_0,\tau_0)$. When $j_0\geq1/2$ and $k_0\leq1/2$, use P2 with $(2j_0-1,2k_0,\tau_0)$. If $\tau_0\leq z_0$, use P3 with $(j_0,k_0,\tau_0/z_0)$; Lemma~\ref{lem:chartfactors} gives $z_0>0$. Any remaining point has $j_0,k_0\geq1/2$ and $\tau_0\geq z_0$. Use B1 with
+$(2j_0-1,2k_0-1,(\tau_0-z_0)/(1-z_0))$.
+Here $1-z_0>0$, and $0\leq\tau_0-z_0\leq1-z_0$. Direct substitution proves coverage also on all threshold surfaces.
+\end{proof}
+
+\begin{lemma}[Domain information in each substitution]\label{lem:chart-domain}
+If a parameter triple in $[0,1]^3$ has $0<j_0,k_0<1$ after its indicated substitution, the restrictions in the following table hold. Every final monomial divisor in Table~\ref{tab:charts} is then positive. Every point in the open new cube $(0,1)^3$ has $0<j_0,k_0<1$ and belongs to the region specified by its row in Lemma~\ref{lem:coverage}.
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Row & Additional restrictions on new parameters\\
+\midrule
+N1 & $j>0$, $0<k<1$\\
+N2 & $0<j<1$, $k>0$, $\tau>0$\\
+N3 & $0<j<1$, $k>0$\\
+P1 & $j>0$, $0<k<1$\\
+P2 & $j<1$, $k>0$\\
+P3 & $0<j,k<1$\\
+B1 & $j,k<1$\\
+\bottomrule
+\end{tabular}
+\refstepcounter{table}\label{tab:domain}\par\smallskip
+\small Table \thetable. The restrictions used for strict positivity; all parameters also lie in $[0,1]$.
+\end{center}
+\end{lemma}
+\begin{proof}
+In N1, $k_0=k$ is interior and $j_0=kj>0$ forces $j>0$. In N2, $j_0=j$ is interior and $k_0=jk\tau>0$ forces $k,\tau>0$. In N3, $j_0=j$ is interior and $k_0=jk>0$ forces $k>0$. In P1, $j_0=j/2>0$ and $k_0=k$ is interior. In P2, $j_0=(1+j)/2<1$ gives $j<1$, and $k_0=k/2>0$ gives $k>0$. In P3, the spatial parameters are unchanged. In B1, $j_0,k_0<1$ give $j,k<1$. These observations prove every row of Table~\ref{tab:domain} and positivity of the listed monomial divisors.
+For an open-cube new triple, the spatial coordinates in N1, N2 and N3 are positive products of numbers less than one, so lie in $(0,1)$. Their comparisons are, respectively, $kj\leq k$, $jk\tau\leq j\tau$, and $j(k\tau)\leq jk\leq j$.
+The spatial half-interval maps have their stated ranges. In P3, $0<z_0\tau<z_0<1$. In B1 the spatial coordinates exceed $1/2$, and $z_0<z_0+(1-z_0)\tau<1$. Thus all the remaining region claims follow. The maps are continuous on every segment used below: their only rational denominator is $D_0>0$.
+\end{proof}
+
+\subsection{The closed integer checks}
+\begin{specification}[Expected finite data]\label{spec:expected-data}
+The following tables are explicit input data for the checker: degree bounds, coefficient counts, witness indices and expected values, and the seven center evaluations. They are not assumed assertions about any polynomial. The checks must connect them to the expression trees and substitutions already defined.
+\begin{center}
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+Row & Degree triple & Positive & Zero & Total\\
+\midrule
+N1 & $(20,42,4)$ & 4465 & 50 & 4515\\
+N2 & $(42,24,24)$ & 26855 & 20 & 26875\\
+N3 & $(42,24,4)$ & 5283 & 92 & 5375\\
+P1 & $(24,24,4)$ & 3040 & 85 & 3125\\
+P2 & $(24,24,4)$ & 3003 & 122 & 3125\\
+P3 & $(32,30,4)$ & 5017 & 98 & 5115\\
+B1 & $(28,28,4)$ & 4165 & 40 & 4205\\
+\midrule
+Total && 51828 & 507 & 52335\\
+\bottomrule
+\end{tabular}
+\refstepcounter{table}\label{tab:counts}\par\smallskip
+\small Table \thetable. Prescribed coefficient counts for the checker.
+\end{center}
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Row & Index $\beta$ & Integer coefficient $b_\beta$\\
+\midrule
+N1 & $(20,1,0)$ & $12600$\\
+N1 & $(20,1,4)$ & $25200$\\
+N2 & $(1,24,24)$ & $25200$\\
+N3 & $(1,24,0)$ & $12600$\\
+N3 & $(1,24,4)$ & $25200$\\
+P1 & $(24,2,0)$ & $109335937500$\\
+P1 & $(24,2,4)$ & $8254492187500$\\
+P2 & $(0,24,0)$ & $3658583003906250000$\\
+P2 & $(0,24,4)$ & $325224219836275200$\\
+P3 & $(1,1,0)$ & $288000$\\
+P3 & $(1,1,4)$ & $288000$\\
+B1 & $(0,0,0)$ & $338787737221858106544$\\
+B1 & $(0,0,4)$ & $62644543774312500000$\\
+\bottomrule
+\end{tabular}
+\refstepcounter{table}\label{tab:witnesses}\par\smallskip
+\small Table \thetable. Prescribed witness indices and exact values; no zero-face classification is assumed.
+\end{center}
+
+\begin{center}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+Row & Old center coordinates & Homogenized integer evaluation of $F$\\
+\midrule
+N1 & $(1/4,1/2,1/2)$ & $985995634140$\\
+N2 & $(1/2,1/8,1/2)$ & $14261600092306860$\\
+N3 & $(1/2,1/4,1/4)$ & $16647495937200$\\
+P1 & $(1/4,1/2,1/2)$ & $1254384798906060$\\
+P2 & $(3/4,1/4,1/2)$ & $95518753872213548060$\\
+P3 & $(1/2,1/2,8/25)$ & $31552024247415$\\
+B1 & $(3/4,3/4,1201/1250)$ & $2424781411012257514012236$\\
+\bottomrule
+\end{tabular}
+\refstepcounter{table}\label{tab:centers}\par\smallskip
+\small Table \thetable. Prescribed integer center evaluations, interpreted by Lemma~\ref{lem:homogeneous-eval}.
+\end{center}
+
+\end{specification}
+
+\subsection{How to discharge this certificate in Lean's kernel}
+\begin{specification}[The exact finite checker]\label{spec:kernelchecker}
+Implement the operations in Section~7 as transparent total functions on finite lists, natural numbers and integers. For the required input expressions, build seven closed Boolean checks. Their required conjuncts are: all numerator and quotient reconstructions needed by the row; the degree/support checks; the three coefficient-transform identities if their outputs are supplied as literals; every coefficient sign in the full box; the exact witness values; and the homogenized center value.
+For a finite list, a conjunction check is defined by $\operatorname{all}([],P)=\mathrm{true}$ and $\operatorname{all}(a::l,P)=P(a)\mathbin{\&\&}\operatorname{all}(l,P)$. Integer equality and order are decided by Lean's ordinary decidable instances. All loops enumerate the inclusive boxes by \lean{List.range (n + 1)}. Missing entries in a sparse input have value zero; they are not omitted from sign checking.
+No check is permitted to take a hash, a Python success flag, an unproved polynomial identity, or the final inequality as an input hypothesis.
+\end{specification}
+
+\begin{lemma}[Reflection for these finite checks]\label{lem:check-sound}
+If the closed checks of Specification~\ref{spec:kernelchecker} equal \lean{true}, then all reconstruction, degree, coefficient, witness and center assertions encoded by those checks follow as propositions of Lean, with no assumption about the program used to produce any candidate arrays.
+\end{lemma}
+\begin{proof}
+For the conjunction checker, induction on the list proves that it equals \lean{true} exactly when each of its tests equals \lean{true}. The empty case has no required test; the nonempty case is the truth table of Boolean conjunction followed by the induction hypothesis. Correctness of the integer comparisons is the specification of their decidable instances. Thus every finite equality and inequality checked is available as an ordinary proposition.
+Reconstruction yields the polynomial identities by Lemmas~\ref{lem:polyops} and \ref{lem:division}; rational conversion is justified by Lemma~\ref{lem:rational}. If transform arrays are supplied rather than reduced from their definitions, their entrywise recurrence checks and induction over the three passes give Lemma~\ref{lem:bernstein-compute}. Their signs and witness values therefore concern the actual coefficients in \eqref{eq:bernstein-id}. The center check has the meaning in Lemma~\ref{lem:homogeneous-eval}. Support bounds and full-box enumeration ensure that no additional coefficient is untested. These steps prove every asserted conclusion without using the candidate generator's correctness.
+\end{proof}
+
+\paragraph{Kernel proof leaves.}
+The closed assertions must be proved by kernel reduction, for example by a proof of the following form after the named Boolean has been defined:
+\begin{lstlisting}
+theorem N1_check : N1Check = true := by
+  decide +kernel
+\end{lstlisting}
+This is a proof template, not a claim that a Lean file has already been compiled. One may instead use definitional reduction to \lean{rfl}, or split the check into smaller integer equalities and inequalities and use proof-producing arithmetic tactics. Do not replace it by \lean{native_decide}, \lean{decide +native}, \lean{ofReduceBool}, an oracle for external output, or an admitted lemma. Lean's documentation distinguishes kernel reduction from native evaluation that adds trust in the compiler \cite{lean-validation,lean-tactics}.
+
+\paragraph{Practical evaluation without changing the proof.}
+The sparse-list definition specifies the computation simply, but the actual kernel proof need not repeatedly expand an entire multiplication or all $52335$ coefficients. Supply proposed normalized intermediate polynomials and the three intermediate coefficient arrays as literal integer lists. For each arithmetic node, check its output coefficient by the finite addition or convolution formula implicit in Specification~\ref{spec:polyops}; for a product, the coefficient of exponent $e$ is the sum of $p_\alpha q_\beta$ over $\alpha+\beta=e$. Verify output support bounds as well. Lemma~\ref{lem:polyops} proves these checks preserve evaluation. A coefficient outside the sum of the input degree bounds is zero because no such pair of exponents exists.
+Check the three Bernstein passes a row or slice at a time using \eqref{eq:bernstein-pass}, and assemble their conclusions by finite induction. Quotient witnesses need only the reconstruction checks, not execution of the bounded division procedure. Each leaf then involves only finite arithmetic on \lean{Nat} and \lean{Int}; rational signs already use the integer formula \eqref{eq:homogeneous-eval}.
+Any literal outputs must be tied to the \emph{fixed} expression tree in Definition~\ref{def:FKQ}, with each operation using its actual already-checked input nodes. It is not enough to verify some unrelated polynomial with the right number of coefficients. This also allows external computation to propose all data without entering the trusted base.
+
+\paragraph{Axiom requirement.}
+For the eventual main theorem, the transitive axiom dependencies must be a subset of the standard mathlib foundation: \lean{propext}, \lean{Classical.choice}, and \lean{Quot.sound}. In particular, there must be no \lean{sorryAx}, no problem-specific axiom, and no native-evaluation axiom. Inspect the main inequality, equality equivalence, and extension theorem separately with \texttt{\#print axioms}; rebuild their imports from source in a pinned Lean/mathlib environment \cite{lean-axioms,lean-validation}. The certificate computations themselves need no choice about real numbers. Choices used later to select an approximating sequence are ordinary classical choices already allowed by this axiom requirement.
+
+\begin{lemma}[Finite certificate]\label{lem:finite-certificate}
+All six conversions in Definition~\ref{def:basepoly} and all divisions in Specification~\ref{spec:charts} succeed and satisfy reconstruction. The degree triples of $F_-,F_+,F_b$ are $(10,12,2)$, $(14,14,2)$ and $(14,14,2)$; those of $H_-,H_+,H_b$ are $(20,24,4)$, $(28,28,4)$ and $(28,28,4)$.
+For the seven transformed polynomials, the Bernstein coefficients computed by Specification~\ref{spec:bernstein-compute} have exactly the counts in Table~\ref{tab:counts}. Every coefficient is nonnegative. The coefficients in Table~\ref{tab:witnesses} have the strictly positive integer values displayed there.
+The images of $(1/2,1/2,1/2)$ and the positive homogenized center evaluations of the appropriate base $F$ are those in Table~\ref{tab:centers}. The degree used for that evaluation is the base $F$ degree just specified.
+\end{lemma}
+\begin{proof}[Proof by a fully specified finite integer computation]
+The input consists only of the constants in Definitions~\ref{def:FKQ} and \ref{def:basepoly}, the seven substitutions in Table~\ref{tab:charts}, the degree triples and witness indices in the prescribed tables, and the normalization and arithmetic algorithms already specified.
+Construct the three rational expressions from their expression trees, using \eqref{eq:ratadd} for addition and multiplication of scalar denominators rather than cancellation by a greatest common divisor. Convert each $\mathcal F$ and each $\mathcal F^2-\mathcal K^2\mathcal Q$ using \eqref{eq:rational-convert}. Normalize their integer polynomials. The maximum exponents give the six stated degree triples.
+Next execute Specification~\ref{spec:charts}. For each resulting polynomial, verify that its support is in the listed degree box and apply the three bounded transforms \eqref{eq:bernstein-pass}. Enumerate \emph{all} indices in
+$\{0,\ldots,n_1\}\times\{0,\ldots,n_2\}\times\{0,\ldots,n_3\}$, including those with zero coefficients. Integer comparison gives the positive and zero counts in Table~\ref{tab:counts}, with no negative value. At the thirteen designated indices it gives the exact integers in Table~\ref{tab:witnesses}.
+For each row, evaluate its substitution at the new center; this yields the fractions in Table~\ref{tab:centers}. Compute the integer \eqref{eq:homogeneous-eval} for the corresponding base $F$ and its degree triple. The results are the last column of that table. This proves their signs entirely over the integers.
+These instructions are an exhaustive finite proof, not an instruction to sample a real function. The computations were repeated using the product-denominator specification in this document, and give all three original base pairs exactly. There are $18$ reconstruction-checked divisions; the largest takes $3753$ steps, less than the specified fuel bound. To turn this finite proof into a Lean proof, make the same closed checks return Booleans and reduce their truth assertions in the kernel, as specified above and justified by Lemma~\ref{lem:check-sound}. A successful Python run is \emph{not} imported as a Lean theorem.
+\end{proof}
+
+\section{Strict positivity, sign recovery, and monotonicity}
+\begin{lemma}[Strict positivity on every required substitution face]\label{lem:chart-strict}
+If a new parameter triple lies in $[0,1]^3$ and represents $0<j_0,k_0<1$ in its row, then the transformed polynomial for that row is strictly positive there.
+\end{lemma}
+\begin{proof}
+Apply Lemma~\ref{lem:bernstein} using all the nonnegative coefficients in Lemma~\ref{lem:finite-certificate}. It remains to exhibit a positive basis term.
+For N1, the spatial factor of either witness in Table~\ref{tab:witnesses} is $j^{20}k(1-k)^{41}>0$ by Table~\ref{tab:domain}. For N2, the single full basis term is $j(1-j)^{41}k^{24}\tau^{24}>0$. This uses $\tau>0$, which follows from $k_0=jk\tau>0$ and must not be discarded.
+For N3 the spatial factor is $j(1-j)^{41}k^{24}>0$; for P1 it is $j^{24}k^2(1-k)^{22}>0$; for P2 it is $(1-j)^{24}k^{24}>0$; for P3 it is $j(1-j)^{31}k(1-k)^{29}>0$; and for B1 it is $(1-j)^{28}(1-k)^{28}>0$. Every strict inequality follows from the corresponding row of Table~\ref{tab:domain}; no factor $(1-k)$ is required where $k=1$ is allowed, and no factor $j$ is required where $j=0$ is allowed.
+Except in N2, the two witnesses have last-coordinate exponents $0$ and $4$. Their remaining factors are $(1-\tau)^4$ and $\tau^4$. If $\tau=0$ the first is one; if $\tau>0$ the second is positive. Thus at least one entire basis term is strictly positive at every allowed $\tau\in[0,1]$. Its coefficient is positive by the finite check, which proves the assertion on all the needed faces as well as the open cube.
+\end{proof}
+
+\begin{lemma}[The squared inequality in the original parameters]\label{lem:disc-positive}
+In every required old-parameter region covered by a row in Table~\ref{tab:charts}, the corresponding rational expression satisfies
+\E{discpositive}{\mathcal F^2-\mathcal K^2\mathcal Q>0.}
+\end{lemma}
+\begin{proof}
+By the conversion checks in Lemma~\ref{lem:finite-certificate} and Lemma~\ref{lem:rational}, the base $H$ evaluates to its positive denominator $d_-^2$, $d_+^2$ or $d_b^2$ times the left side of \eqref{eq:discpositive}.
+Choose new parameters representing the old triple by Lemma~\ref{lem:coverage}. The transformed $H$ is positive by Lemma~\ref{lem:chart-strict}. Undo the steps of Specification~\ref{spec:charts} in reverse order. Every final monomial divisor is positive by Lemma~\ref{lem:chart-domain}. Every half-interval multiplier is a positive power of $2$, and every cleared rational-substitution multiplier is a positive power of $D_0$, by Lemma~\ref{lem:substitutions}. The B1 division by $P_-^2$ occurs before the half-interval maps, so its restored factor is evaluated at the half-substituted old spatial coordinates. They lie in $(0,1)$; Lemma~\ref{lem:chartfactors} makes that factor positive.
+The initial divisions by $P_0$ in the positive and boundary rows also restore a positive factor at the old spatial coordinates. All these identities are checked polynomial reconstructions, justified by Lemma~\ref{lem:division}. Thus the base $H$ is positive at the original triple. Dividing by its positive squared denominator proves \eqref{eq:discpositive}. In N1--N3 there is no initial $P_0$ division; the same argument simply omits that step.
+\end{proof}
+
+\begin{lemma}[Recovery of the sign lost by squaring]\label{lem:Fpositive}
+In every old-parameter region in Lemma~\ref{lem:disc-positive}, the corresponding $\mathcal F$ is strictly positive.
+\end{lemma}
+\begin{proof}
+Choose a representing new parameter $x=(j,k,\tau)\in[0,1]^3$. For $0\leq\lambda\leq1$, join it to the center by
+\E{center-path}{x(\lambda)=(1-\lambda)x+\lambda(1/2,1/2,1/2).}
+This is the definition of the segment. At $\lambda=0$ it is the given allowed point. For $0<\lambda\leq1$, each of its coordinates lies between $\lambda/2>0$ and $1-\lambda/2<1$. Thus the segment except possibly its initial point lies in the open cube. Lemma~\ref{lem:chart-domain} puts every image under the chosen substitution in the same required old-parameter region with interior spatial coordinates.
+By Lemmas~\ref{lem:remove-root} and \ref{lem:disc-positive}, along the entire segment $\mathcal Q>0$ and $\mathcal F^2>\mathcal K^2\mathcal Q\geq0$. Therefore $\mathcal F$ never vanishes. It is continuous along the segment: Definition~\ref{def:FKQ} contains only rational operations with denominators products of positive constants, $1+j_0^2$, and $1+k_0^2$, and the substitution map is continuous.
+At $\lambda=1$, the appropriate integer numerator $F$ has positive sign by Table~\ref{tab:centers} and Lemma~\ref{lem:homogeneous-eval}. Its denominator $d_\varepsilon$ is positive, so $\mathcal F>0$ there. If its value at $\lambda=0$ were negative, the intermediate value theorem would give a zero on the segment; equality to zero is already excluded. Hence it is positive at the original point.
+This proof uses no sign hypothesis on $\mathcal K$ and does not assert that positivity of a square determines the original sign without the path argument.
+\end{proof}
+
+\begin{lemma}[Positivity of $V$ and the derivative]\label{lem:Vpositive}
+For $a,b>0$, $|u|\leq a$, $a+b<1$ and $t=u/a$, one has $V>0$ and
+\E{derivative-positive}{\frac{d}{da}(C^2B)>0,\qquad\text{with $b,u$ fixed}.}
+\end{lemma}
+\begin{proof}
+Lemma~\ref{lem:vy} gives $0<v,y<1$. Lemma~\ref{lem:rational-param} supplies $j_0,k_0\in(0,1)$ representing these values.
+If $t\leq0$, use $\varepsilon=-1$ and $\tau_0=-t\in[0,1]$. The negative rows cover this triple by Lemma~\ref{lem:coverage}. Lemmas~\ref{lem:disc-positive} and \ref{lem:Fpositive}, followed by Lemma~\ref{lem:remove-root}, give $\Phi_->0$. Lemma~\ref{lem:Phi} gives $V\geq\Phi_->0$.
+If $t\geq0$, use $\varepsilon=1$ and $\tau_0=t$. When $v\leq4/5$, the threshold equivalence in Lemma~\ref{lem:rational-param} gives $j_0\leq1/2$, so P1 applies. Otherwise, if $y\leq4/5$, P2 applies. In the remaining cases, if $t\leq z$, P3 applies. Any point not yet covered has $v,y\geq4/5$ and $t\geq z$, so B1 applies. The first three rows prove $\Phi_+>0$ and hence $V>0$ by Lemma~\ref{lem:Phi}; B1 proves $\Psi>0$ and hence $V>0$ by Lemma~\ref{lem:Psi}. All case inequalities are weak, so no threshold surface is missing.
+Finally the factor $4aTC/S^2$ in \eqref{eq:Videntity} is positive by Lemmas~\ref{lem:reduction} and \ref{lem:TS}. Multiplying by $V>0$ proves \eqref{eq:derivative-positive}.
+\end{proof}
+
+\begin{lemma}[Strict inequality off the exceptional interior sets]\label{lem:interior-strict}
+For $a,b>0$, $a+b<1$ and $|t|<1$, one has $C>R$.
+\end{lemma}
+\begin{proof}
+Fix the target $a,b,t$ and put $u=ta$. Then $|u|<a$. Keep $b,u$ fixed and vary the spatial coordinate from $|u|$ to $a$.
+If $u\ne0$, the function $h\mapsto C(h)^2B(h)$, with $t=u/h$, is continuous on $[|u|,a]$ and differentiable on its open interval. Indeed $h>0$ throughout that closed interval, $h+b\leq a+b<1$, and the formulas in \eqref{eq:Beexplicit} involve only differentiable elementary functions with nonzero denominators. At $h=|u|$, $t=u/|u|$ is $1$ or $-1$. Lemma~\ref{lem:exceptional} gives $C=1$ and $B=k(u,b)$ there.
+Lemma~\ref{lem:Vpositive} gives a positive derivative at every point of $(|u|,a)$. Apply \eqref{eq:MVT} to obtain $C(a)^2B(a)>k(u,b)$.
+If $u=0$, then $t=0$ for every $h>0$. On $[0,a]$ define
+$B(h)=[k(h,b)+k(-h,b)]/2$ and
+$C(h)=1-r(b)+[r(h-b)+r(h+b)]/2$.
+These formulas agree with the required functions for $h>0$ and are continuous at zero by Lemmas~\ref{lem:r} and \ref{lem:Kregular}. They give $B(0)=k(0,b)$ and $C(0)=1$. The derivative is positive for $0<h<a$ by Lemma~\ref{lem:Vpositive}. The mean value theorem on $[0,a]$ again gives $C(a)^2B(a)>k(0,b)$.
+Thus in either case $C^2>k(u,b)/B=R^2$, since $B>0$. Both $C$ and $R$ are nonnegative, and $C>0$, so $C>R$. No expression containing $u/h$ or $J/h$ is evaluated at $h=0$ in the second case.
+\end{proof}
+
+\begin{lemma}[The complete interior conclusion]\label{lem:interior-complete}
+The inequality and equality characterization of Theorem~\ref{thm:main} hold whenever $c,d\in(0,1)$ and $s\in[0,1]$.
+\end{lemma}
+\begin{proof}
+Use the symmetries in Lemma~\ref{lem:reduction} to assume $a,b\geq0$, $a+b<1$. If $a=0$ or $|t|=1$, Lemma~\ref{lem:exceptional} gives equality. If $b=0$, the same lemma gives the inequality with equality exactly when $a=0$, $t=0$ or $|t|=1$. In every remaining case $a,b>0$ and $|t|<1$, so Lemma~\ref{lem:interior-strict} gives strict inequality.
+The resulting equality set is $a=0$, or $|t|=1$, or $b=0$ and $t=0$. By \eqref{eq:abtu}, these translate exactly to $c+d=1$, or $s\in\{0,1\}$, or $c=d$ and $s=1/2$. The symmetries preserve all three alternatives, so the characterization holds before the reduction as well.
+\end{proof}
+
+\section{Completion on the spatial boundary}
+\begin{definition}[The comparison function in the original variables]\label{def:originalC}
+For $s,c,d\in[0,1]$ define
+\E{originalC}{C(s,c,d)=1-r(2q-1)+s\,r(2d-1)+(1-s)r(2c-1).}
+This agrees with the reduced $C$ in Definition~\ref{def:reduced} whenever the latter is used, by \eqref{eq:coordinates-linear} and $s=(1-t)/2$.
+\end{definition}
+
+\begin{lemma}[Boundary inequality and all boundary equality cases]\label{lem:boundary}
+If at least one of $c,d$ is in $\{0,1\}$, then $R\leq C$ with the convention in Theorem~\ref{thm:main}. Equality holds precisely when $s\in\{0,1\}$, or $c+d=1$, or $s=1/2$ and $c=d$.
+\end{lemma}
+\begin{proof}
+First consider a boundary point assigned $R=1$. If $s=0$, then $q=c$ and the $r(2c-1)$ terms in $C$ cancel, so $C=1$. If $s=1$, then $q=1-d$ and evenness of $r$ gives the same conclusion. If $c+d=1$, then $q=c$ and $r(2d-1)=r(2c-1)$, so again $C=1$.
+At all other boundary points the definition gives $R=0$, with $0<s<1$ and $c+d\ne1$. The value $q$ lies in $[0,1]$ as a convex combination. Lemma~\ref{lem:r} therefore makes each of the three terms $1-r(2q-1)$, $s r(2d-1)$ and $(1-s)r(2c-1)$ nonnegative. Thus $C\geq0$.
+If their sum is zero, each term is zero. Since $s$ and $1-s$ are positive, this implies $r(2c-1)=r(2d-1)=0$, so $c,d\in\{0,1\}$. Also $r(2q-1)=1$, so $q=1/2$. The two complementary endpoint pairs have already been assigned $R=1$ and are excluded in this case. If $c=d=0$, then $q=s$; if $c=d=1$, then $q=1-s$. Thus in the present case equality holds exactly for these two equal-endpoint pairs with $s=1/2$. Direct substitution also proves equality at those points. Combining the two cases proves the lemma.
+\end{proof}
+
+Lemmas~\ref{lem:interior-complete} and \ref{lem:boundary} exhaust $[0,1]^3$. With the definition \eqref{eq:originalC}, their inequality $R\leq C$ is exactly \eqref{eq:main-ineq}, and their equality alternatives are exactly \eqref{eq:main-equality}. This completes the proof of Theorem~\ref{thm:main}.\hfill$\square$
+
+\section{The boundary convention as an upper-semicontinuous envelope}
+This section is a separate conclusion about the function in Theorem~\ref{thm:main}, not an assumption used to prove the inequality. Approaches are joint in all three variables. We use the full open cube $U=(0,1)^3$; this is a stronger approach convention than allowing the $s$-coordinate to remain at an endpoint.
+
+\begin{lemma}[Boundedness, continuity of $C$, and density]\label{lem:envelope-basic}
+On $[0,1]^3$, $0\leq R\leq2$, and $C$ in \eqref{eq:originalC} is continuous. Every point of the closed cube is a limit of points of $U$.
+\end{lemma}
+\begin{proof}
+Nonnegativity of $R$ follows from its square-root or constant definition. Theorem~\ref{thm:main} gives $R\leq C$, and Lemma~\ref{lem:r} gives $C\leq1+s+(1-s)=2$.
+The map $q$ is polynomial in its variables and $r$ is continuous, so every term of \eqref{eq:originalC} is continuous. For density, for $x=(s,c,d)\in[0,1]^3$ and $0<\epsilon<1/2$, set
+\E{density-sequence}{x_\epsilon=(1-2\epsilon)x+\epsilon(1,1,1).}
+Each coordinate lies between $\epsilon$ and $1-\epsilon$, so $x_\epsilon\in U$. Its difference from the corresponding coordinate of $x$ is $\epsilon(1-2x_i)$, whose absolute value is at most $\epsilon$. Hence $\|x_\epsilon-x\|_\infty\leq\epsilon$, proving density.
+\end{proof}
+
+\begin{lemma}[Vanishing at noncomplementary boundary points]\label{lem:vanishing}
+Let $x_n=(s_n,c_n,d_n)\in U$ tend to $x_*=(s_*,c_*,d_*)$ with $0<s_*<1$, with at least one spatial coordinate an endpoint, and with $c_*+d_*\ne1$. Then $R(x_n)\to0$.
+\end{lemma}
+\begin{proof}
+First, the limiting values $p_*,q_*$ are in $(0,1)$. A convex combination with both weights strictly positive can equal an endpoint only if both its entries equal that endpoint. For $p_*=0$ this would require $c_*=1,d_*=0$; for $p_*=1$ it would require $c_*=0,d_*=1$. The same two excluded pairs follow from an endpoint value of $q_*$. Thus Lemma~\ref{lem:Kregular} shows the numerator $K(p_n\mid q_n)$ is bounded, say by a fixed $M\geq1$ for all sufficiently large $n$.
+Suppose first $c_*\ne d_*$. Exactly one of $c_*,d_*$ is an endpoint and the other is interior; two distinct endpoints would be complementary. By swapping the two spatial variables and replacing $s_n$ by $1-s_n$ when necessary, and complementing both spatial variables when necessary, reduce to $c_*=0$ and $d_*\in(0,1)$. These are the two symmetries proved in Lemma~\ref{lem:reduction}, applied to the interior sequence.
+Choose $\eta>0$ so small that eventually $d_n\in[\eta,1-\eta]$, $1-s_n\geq\eta$, and $c_n<\eta/2$. In particular $c_n\ne d_n$.
+Expanding the four logarithm terms gives the explicit lower bound
+\E{Dedge-bound}{D(d_n\mid c_n)\geq\eta(-\log c_n)+\log\eta.}
+Indeed $-\log c_n\geq0$ and $d_n\geq\eta$. Also
+$d_n\log d_n+(1-d_n)\log(1-d_n)\geq\log\eta$, since both logarithms are at least $\log\eta$ and the coefficients sum to one. Finally $-(1-d_n)\log(1-c_n)\geq0$. These three observations prove \eqref{eq:Dedge-bound}.
+As $c_n\to0$ through positive numbers, $-\log c_n\to+\infty$: for any real $L$, eventually $c_n<\exp(-L)$, and monotonicity of the logarithm gives $-\log c_n>L$. Thus the right side of \eqref{eq:Dedge-bound} diverges to $+\infty$.
+By Lemma~\ref{lem:Kregular}, $D(d_n\mid c_n)\geq0$. Since $0<(d_n-c_n)^2<1$, one has $K(d_n\mid c_n)\geq D(d_n\mid c_n)$. Its positive denominator weight $1-s_n\geq\eta$ makes the denominator of $R^2$ tend to $+\infty$. A bounded nonnegative numerator divided by this denominator tends to zero. Explicitly, for any $\varepsilon>0$, eventually the denominator exceeds $M/\varepsilon^2$, giving $0\leq R(x_n)<\varepsilon$.
+It remains to consider equal spatial endpoint limits. For $c_*=d_*=0$, if $0<c_n,d_n\leq\delta$, every affine interpolant in \eqref{eq:Kintegral} lies in $(0,\delta]$. Its product with its complement is at most $\delta$, so
+\E{corner-bound}{K(c_n\mid d_n),K(d_n\mid c_n)\geq\frac1{2\delta},\qquad
+ R(x_n)^2\leq2\delta K(p_n\mid q_n)\leq2\delta M.}
+The first inequalities follow by integrating $(1-\lambda)/\delta$, including when $c_n=d_n$. The denominator weights sum to one, so their weighted sum has the same lower bound, proving the inequalities for $R^2$. Given $\varepsilon>0$, take $\delta>0$ with $2\delta M<\varepsilon^2$ and then take $n$ large. This proves convergence to zero uniformly in the relative rates of $c_n,d_n$. If $c_*=d_*=1$, complementation reduces to the case just proved. This exhausts the noncomplementary spatial boundary.
+\end{proof}
+
+\begin{lemma}[Local upper bounds at every closed-cube point]\label{lem:local-upper}
+For every $x\in[0,1]^3$ and every $\varepsilon>0$, there is $\delta>0$ such that
+\E{local-upper}{y\in U,\quad \|y-x\|_\infty<\delta
+ \quad\Longrightarrow\quad R(y)\leq R(x)+\varepsilon.}
+\end{lemma}
+\begin{proof}
+If the spatial coordinates of $x$ are interior, Lemma~\ref{lem:domain} gives continuity relative to $s\in[0,1]$, and hence \eqref{eq:local-upper}.
+If $x$ is a spatial boundary point assigned $R=1$, Lemma~\ref{lem:boundary} gives $C(x)=1$. By continuity of $C$, a sufficiently small neighborhood has $C(y)<1+\varepsilon$. Theorem~\ref{thm:main} gives $R(y)\leq C(y)$, proving the assertion.
+Any other spatial boundary point has $0<s<1$, is noncomplementary, and has $R(x)=0$. If \eqref{eq:local-upper} failed for some $\varepsilon>0$, for every positive integer $n$ choose $y_n\in U$ with $\|y_n-x\|_\infty<1/n$ and $R(y_n)>\varepsilon$. Then $y_n\to x$ but $R(y_n)$ does not tend to zero, contradicting Lemma~\ref{lem:vanishing}. This proves the remaining case. The selection of the sequence is ordinary classical choice, not a new axiom.
+\end{proof}
+
+\begin{lemma}[Recovery sequences entirely in the open cube]\label{lem:recovery}
+For every $x\in[0,1]^3$ there is a sequence $y_n\in U$ such that
+\E{recovery}{y_n\longrightarrow x,\qquad R(y_n)\longrightarrow R(x).}
+\end{lemma}
+\begin{proof}
+If $x\in U$, use the constant sequence. If $x$ is a spatial boundary point assigned $R=0$, use \eqref{eq:density-sequence} with $\epsilon_n=1/(n+3)$, and apply Lemma~\ref{lem:vanishing}.
+At a complementary spatial corner, take $c_n=\epsilon_n,d_n=1-\epsilon_n$ or the reversed pair as appropriate, and take $s_n=(1-2\epsilon_n)s+\epsilon_n$. These points belong to $U$, tend to $x$, and have $c_n+d_n=1$. Lemma~\ref{lem:exceptional}, or Lemma~\ref{lem:interior-complete} together with $C=1$, gives $R(y_n)=1$ for every $n$, the required boundary value.
+The remaining cases have $s=0$ or $s=1$. Smooth the spatial coordinates by
+$c_n=(1-2\epsilon_n)c+\epsilon_n$ and $d_n=(1-2\epsilon_n)d+\epsilon_n$.
+For each fixed $n$ these coordinates are interior. The function $h\mapsto R(h,c_n,d_n)$ is continuous on $[0,1]$ by Lemma~\ref{lem:domain}, and its endpoint value at the prescribed $s$ is $1$ by Lemma~\ref{lem:exceptional} and the reduction.
+Choose $\delta_n>0$ such that $|h-s|<\delta_n$ with $h\in[0,1]$ implies $|R(h,c_n,d_n)-1|<\epsilon_n$. Put $\alpha_n=\min(\epsilon_n,\delta_n/2)>0$. Take $s_n=\alpha_n$ if $s=0$, and $s_n=1-\alpha_n$ if $s=1$.
+Then $0<s_n<1$, $|s_n-s|\leq\epsilon_n$, and $|s_n-s|<\delta_n$. Thus $y_n=(s_n,c_n,d_n)\in U$ converges to $x$ and $|R(y_n)-1|<\epsilon_n$. This gives \eqref{eq:recovery}, including simultaneous spatial degeneration at $s$-endpoints, without asserting that every such approach has limit one.
+\end{proof}
+
+\begin{definition}[Upper-semicontinuous envelope]\label{def:envelope}
+For $x\in[0,1]^3$ define
+\E{envelope}{R^*(x)=\inf_{\delta>0}\ \sup\{R(y):y\in U,\ \|y-x\|_\infty<\delta\}.}
+Every local set is nonempty by Lemma~\ref{lem:envelope-basic}, and its values are bounded between $0$ and $2$. Thus all suprema and the infimum are finite real numbers. This is the upper limiting envelope from the full open cube, not a continuous-extension definition.
+\end{definition}
+
+\begin{theorem}[Exact identification of the boundary convention]\label{thm:envelope}
+For every $x\in[0,1]^3$, $R^*(x)=R(x)$. Moreover $R$ is upper semicontinuous on the closed cube.
+\end{theorem}
+\begin{proof}
+Fix $x$. For each $\delta>0$, a recovery sequence from Lemma~\ref{lem:recovery} eventually lies in the corresponding neighborhood of $x$. Hence its $R$-values are eventually bounded above by the local supremum. Taking their limit gives $R(x)$ at most that supremum. This holds for every $\delta$, so $R(x)\leq R^*(x)$.
+Given $\varepsilon>0$, Lemma~\ref{lem:local-upper} supplies a neighborhood on which every interior value is at most $R(x)+\varepsilon$. Its supremum has the same upper bound; hence $R^*(x)\leq R(x)+\varepsilon$. Since this holds for every positive $\varepsilon$, $R^*(x)\leq R(x)$. This proves equality, using the ordinary completeness and order properties of $\R$.
+To prove upper semicontinuity directly, use Lemma~\ref{lem:local-upper} with $\varepsilon/2$ and radius $\delta$. If $z$ is a closed-cube point with $\|z-x\|_\infty<\delta/2$, take a recovery sequence for $z$. Its terms eventually lie within $\delta$ of $x$ by the triangle inequality. Their values are then at most $R(x)+\varepsilon/2$; taking the limit gives $R(z)\leq R(x)+\varepsilon/2<R(x)+\varepsilon$. This is precisely upper semicontinuity relative to the closed cube.
+The argument identifies the upper envelope at complementary corners and $s$-endpoints. It never asserts a unique limit along all approaches at those points.
+\end{proof}
+
+\section{Formalization order and final acceptance conditions}
+The main theorem is stated first for the reader, but its Lean declaration should be placed after the local lemmas it uses. The document order is a dependency order: the elementary logarithm and square-root lemmas precede $K$; the bounds for $H,I$ precede the normalized derivative; the arithmetic soundness lemmas precede the certificate; the certificate and its sign recovery precede monotonicity; and the envelope theorem follows the main inequality. The introductory statement is never used as an assumption in its own proof.
+
+A suggested file separation is \lean{Definitions.lean}, \lean{ElementaryAnalysis.lean}, \lean{Coordinates.lean}, \lean{IntegerPolynomials.lean}, \lean{CertificateData.lean}, \lean{CertificateChecks.lean}, \lean{Monotonicity.lean}, and \lean{Boundary.lean}. These are suggested project filenames, not claims of existing code. In the first file, use exactly the piecewise definitions in the introduction; in the data and checks files, keep every proposed integer array distinct from the theorem proving it correct.
+
+For derivatives, formalize \lean{HasDerivAt} statements with $b,u$ explicit fixed arguments, then derive the corresponding \lean{deriv} identities. Do not accidentally differentiate the function with $t$ fixed. For integrals, establish continuity on the compact integration interval before applying linearity or order. For coordinate transformations and rational identities, discharge all positivity and nonzero side conditions before clearing denominators. The proofs above give these conditions explicitly.
+
+The exported statements must quantify over all $s,c,d\in[0,1]$, not merely the open cube, and must preserve both directions of the equality characterization. They must identify the original divergence ratio off the diagonal by Lemma~\ref{lem:domain} and the diagonal value by Lemma~\ref{lem:Kintegral}. Export Theorem~\ref{thm:envelope} separately; proving the piecewise inequality alone does not establish that additional claim.
+
+The final development is accepted only after a clean build with pinned source versions, no unfinished proofs, all seven closed certificate checks proved without native evaluation, and the axiom audit specified after Lemma~\ref{lem:check-sound}. This document supplies the mathematical proofs and exact computational specification for that task. It does not claim that kernel execution times or a completed Lean formalization have already been measured.
+
+\begin{thebibliography}{20}
+\bibitem{source-short}
+\emph{A shorter exact-arithmetic proof of the weak Hellinger three-point inequality}, September 2026. Latest supplied revised source: \texttt{weak\_hellinger\_standard\_notation.tex}; accompanying reference verifier: \texttt{verify\_short.py}. The theorem, boundary convention and seven retained polynomial certificates are the mathematical source of this blueprint.
+\bibitem{source-original}
+\emph{An exact-arithmetic proof of the weak Hellinger three-point inequality}, September 2026. Supplied original PDF, \texttt{weak\_hellinger\_complete(1).pdf}, especially Sections 2--5. The algebraic coordinate formulas are from Section 3.1.
+\bibitem{lib-log}
+mathlib documentation, \lean{Mathlib.Analysis.SpecialFunctions.Log.Deriv}, particularly \lean{Real.hasDerivAt_log}; and \texttt{Log.Basic} for the elementary logarithm identities.
+\url{https://leanprover-community.github.io/mathlib4_docs/Mathlib/Analysis/SpecialFunctions/Log/Deriv.html}
+\bibitem{lib-sqrt}
+mathlib documentation, \lean{Mathlib.Analysis.SpecialFunctions.Sqrt}, particularly \lean{Real.hasDerivAt_sqrt} and \texttt{HasDerivAt.sqrt}.
+\url{https://leanprover-community.github.io/mathlib4_docs/Mathlib/Analysis/SpecialFunctions/Sqrt.html}
+\bibitem{lib-ftc}
+mathlib documentation, \lean{Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus}, particularly \lean{intervalIntegral.integral_eq_sub_of_hasDerivAt}.
+\url{https://leanprover-community.github.io/mathlib4_docs/Mathlib/MeasureTheory/Integral/IntervalIntegral/FundThmCalculus.html}
+\bibitem{lib-integral}
+mathlib documentation, \lean{Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic}: interval integrability, linearity, comparison and affine substitutions.
+\url{https://leanprover-community.github.io/mathlib4_docs/Mathlib/MeasureTheory/Integral/IntervalIntegral/Basic.html}
+\bibitem{lib-mvt}
+mathlib documentation, \lean{Mathlib.Analysis.Calculus.Deriv.MeanValue}, particularly \lean{exists_hasDerivAt_eq_slope}.
+\url{https://leanprover-community.github.io/mathlib4_docs/Mathlib/Analysis/Calculus/Deriv/MeanValue.html}
+\bibitem{lib-ivt}
+mathlib documentation, \lean{Mathlib.Topology.Order.IntermediateValue}.
+\url{https://leanprover-community.github.io/mathlib4_docs/Mathlib/Topology/Order/IntermediateValue.html}
+\bibitem{lean-axioms}
+\emph{The Lean Language Reference}, ``Axioms.''
+\url{https://lean-lang.org/doc/reference/latest/Axioms/}
+\bibitem{lean-validation}
+\emph{The Lean Language Reference}, ``Validating a Lean Proof.''
+\url{https://lean-lang.org/doc/reference/latest/ValidatingProofs/}
+\bibitem{lean-tactics}
+\emph{The Lean Language Reference}, ``Tactic Reference,'' entries for \texttt{decide}, kernel reduction and native evaluation.
+\url{https://lean-lang.org/doc/reference/latest/Tactic-Proofs/Tactic-Reference/}
+\end{thebibliography}
+\end{document}
