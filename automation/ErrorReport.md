@@ -53,3 +53,12 @@ For kernel performance, normalization now sorts the input terms in decreasing le
 
 
 2026-09-08T08:29:01.0520800-04:00 — P1/P2 recursion-limit fix: both exact conditional wrapper tests passed after adding the symbolic polyHalfSubstitute_zero equality and using congruence/transitivity to match the existing polyHalfZero results. Audits are propext and Quot.sound only. The limit-only diagnostic remained slow and was stopped after this alternative passed. Applied the bridge in the source and restarted ordinary full lake build; the closed final certificate is still awaiting that gate. A transient whole-file newline diff from Python write_text was corrected back to the original LF endings before committing; no mathematical content changed in that correction.
+
+
+2026-09-08T11:16:37.736114-04:00 — Module extraction: the first build could not locate FiniteCertificate.olean because lakefile.toml listed only the original module root. Added the authorized certificate module to the root list and restarted lake build. A standalone check of the extracted definitions and generic checker prerequisites passed with standard axioms. No mathematical statements or certificate data changed; the full split build is pending.
+
+
+2026-09-08T12:09:41.053782-04:00 — Resolution of the P1/P2 assembly recursion failure: the corrected original full lake build succeeded (3472 jobs); finite_certificate audited to propext, Classical.choice, Quot.sound only, and both wrappers to propext and Quot.sound. Subsequent extraction preserved the polynomial data and mathematical statements. Every remaining proof through both explicit main statements has passed development compilation with the single user-authorized temporary certificate axiom. That axiom is now removed from source; the real extracted-module build and final audits are pending. No mathematical source discrepancy was introduced by the split or downstream proofs.
+
+
+2026-09-08T14:05:25.442391-04:00 ? Final resolution: the existing full extracted-module Lake build succeeded (3473 jobs). The real finite_certificate and both final main theorems audit to only propext, Classical.choice, Quot.sound. The extraction validation gate and all downstream proof gates are closed. No dummy axiom remains, no new source discrepancy was found, and the frozen certificate was not modified.

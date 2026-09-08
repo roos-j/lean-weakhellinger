@@ -1,8 +1,10 @@
 # Main target
 
+Complete: the existing full real-certificate build passed, including the closed-cube inequality and every equality case. Final audits use only propext, Classical.choice, and Quot.sound; no temporary axiom remains.
+
 status | exact source location | brief mathematical step | ISO 8601 timestamp with offset
 --- | --- | --- | ---
-not started | thm:main | Closed-cube inequality and exact equality characterization | 2026-09-07T18:47:32.2387182-04:00
+complete | thm:main | Closed-cube inequality and exact equality characterization | 2026-09-08T14:05:25.442391-04:00
 
 # Proof order
 
@@ -44,13 +46,13 @@ complete | lem:coverage | Complete substitution coverage | 2026-09-07T20:51:12.3
 complete | lem:chart-domain | Domain information in each substitution | 2026-09-07T20:52:51.2473100-04:00
 complete | lem:check-sound | Reflection for these finite checks | 2026-09-07T21:03:23.1002312-04:00
 complete | lem:finite-certificate | Finite certificate | 2026-09-08T11:09:47.354333-04:00
-not started | lem:chart-strict | Strict positivity on every required substitution face | 2026-09-07T18:47:32.2387182-04:00
-not started | lem:disc-positive | The squared inequality in the original parameters | 2026-09-07T18:47:32.2387182-04:00
-not started | lem:Fpositive | Recovery of the sign lost by squaring | 2026-09-07T18:47:32.2387182-04:00
-not started | lem:Vpositive | Positivity of $V$ and the derivative | 2026-09-07T18:47:32.2387182-04:00
-not started | lem:interior-strict | Strict inequality off the exceptional interior sets | 2026-09-07T18:47:32.2387182-04:00
-not started | lem:interior-complete | The complete interior conclusion | 2026-09-07T18:47:32.2387182-04:00
-not started | lem:boundary | Boundary inequality and all boundary equality cases | 2026-09-07T18:47:32.2387182-04:00
+complete | lem:chart-strict | Strict positivity on every required substitution face | 2026-09-08T14:05:25.442391-04:00
+complete | lem:disc-positive | The squared inequality in the original parameters | 2026-09-08T14:05:25.442391-04:00
+complete | lem:Fpositive | Recovery of the sign lost by squaring | 2026-09-08T14:05:25.442391-04:00
+complete | lem:Vpositive | Positivity of $V$ and the derivative | 2026-09-08T14:05:25.442391-04:00
+complete | lem:interior-strict | Strict inequality off the exceptional interior sets | 2026-09-08T14:05:25.442391-04:00
+complete | lem:interior-complete | The complete interior conclusion | 2026-09-08T14:05:25.442391-04:00
+complete | lem:boundary | Boundary inequality and all boundary equality cases | 2026-09-08T14:05:25.442391-04:00
 
 # Verification
 
@@ -191,3 +193,47 @@ not started | lem:boundary | Boundary inequality and all boundary equality cases
 
 
 2026-09-08T11:09:47.354333-04:00 — Corrected ordinary lake build PASSED (3472 jobs). Auto.finite_certificate audits to propext, Classical.choice, Quot.sound only; both corrected P1/P2 assembly proofs audit to propext and Quot.sound. No sorryAx or error appears in the successful build output. The real finite certificate is complete. Next is the authorized module extraction and verification, followed by provisional downstream development with at most one temporary certificate axiom and final restoration.
+
+
+2026-09-08T11:16:37.736114-04:00 — The verified certificate has been extracted into FiniteCertificate.lean, with the analytic proof importing it. An isolated check of the extracted prerequisite prefix PASSED; the full split lake build is running. The source mathematics and certificate data are unchanged. The certificate remains proved by the pre-extraction successful build, but the new module layout is not yet fully verified. No dummy axiom or downstream completion is claimed.
+
+
+2026-09-08T11:27:59.728902-04:00 — Per the latest user instruction, development now proceeds concurrently with the real split certificate build. The real FiniteCertificate.lean imports Mathlib only and is frozen. Its SHA256 is 0c99273c54cbe0affb6b4f6a09c474026b8bae73da98265a079c12b4281dd13e. The ONE temporary certificate axiom is in TheePointInequality.lean; an ignored isolated import artifact contains only the certificate definitions and generic prerequisites. That artifact passed compilation without extra axioms. The main file now contains the chart positive-witness and strict-positivity proofs; their development build is running. These are provisional until checked and ultimately validated with the real certificate.
+
+
+2026-09-08T11:30:42.865328-04:00 — Main-file development check PASSED. chart_positive_witness audits to standard axioms only; chart_strict additionally uses the single authorized finite_certificate axiom. Chart strictness is provisionally proved and awaits real-certificate validation; next development item is disc-positive. The real certificate build remains running. Its source hash still matches the freeze checkpoint; the only previously uncommitted difference is the already instructed copyright-holder header correction.
+
+
+2026-09-08T11:38:11.417101-04:00 — Full main-file development check PASSED through disc_positive. All seven inverse chart arguments, including the B1 factor at half-substituted spatial coordinates, are proved with standard axioms plus the ONE authorized finite_certificate axiom. No sorryAx is present in the successful development output. Next development step: Fpositive (continuity and positive center recover the unsquared sign). Real certificate build remains in the background.
+
+
+2026-09-08T11:43:08.883000-04:00 — Full main-file development check PASSED through Fpositive. The center-path domain, continuity, center sign, and intermediate-value sign recovery are proved; Fpositive uses only standard axioms plus the ONE authorized finite_certificate axiom. Next development step: Vpositive. All new source remains in TheePointInequality.lean; real certificate build continues unchanged.
+
+
+2026-09-08T11:46:50.454204-04:00 — Full main-file development check PASSED through Vpositive and fixed_u_derivative_pos. The chart coverage, rational parameter inverse, radical removal, and Phi/Psi comparisons establish strict positivity of V and the full derivative with only standard axioms plus the authorized certificate axiom. Next: interior-strict, treating nonzero fixed u and the division-free zero case separately.
+
+
+2026-09-08T11:51:46.791987-04:00 — Full main-file development check PASSED through interior_strict. Strict monotonicity is proved separately for nonzero fixed u and for the division-free zero-time function, including its continuity at zero. The strict reduced inequality uses only standard axioms plus the authorized certificate axiom. Next: combine exceptional cases and transport the exact equality characterization back to the original interior coordinates.
+
+
+2026-09-08T11:54:13.607593-04:00 — Full main-file development check PASSED through interior_complete: the inequality and exact equality equivalence now hold for all interior spatial coordinates and every s in the closed unit interval. Normalization and inverse transport preserve every equality alternative. Standard axioms plus the authorized dummy certificate only. Next: boundary cases, then main theorem assembly and real-certificate validation.
+
+
+2026-09-08T11:59:54.108133-04:00 — Full main-file development check PASSED through boundary_complete. The boundary inequality and exact equality equivalence use only propext, Classical.choice, Quot.sound; they do not use the dummy certificate axiom. All mathematical branches are now developed. Next: assemble the two explicit main statements, check them with the dummy, remove the temporary axiom, and validate against the real certificate once its background build completes.
+
+
+2026-09-08T12:02:32.565763-04:00 — Both final statements, three_point_inequality and three_point_equality_iff, PASSED the full main-file development check. Their audits contain the standard axioms plus the ONE authorized temporary finite_certificate axiom; no sorryAx occurs. That axiom has now been removed from the main source. All proof code is present, but final source completion awaits the real background certificate build and final standard-axiom audits. The frozen certificate file was not edited.
+
+
+2026-09-08T12:15:48.623844-04:00 — Removed the entire isolated dummy directory at the user's request, including its generated source, oleans, and diagnostic log. The main source already contains no temporary axiom. Both real Lean sources and the real build artifacts were left untouched; no build was started or restarted. Final real-build validation remains pending, and other work stays paused until the user resumes.
+
+
+2026-09-08T12:33:15.727587-04:00 — User requested timed resumption at the expected finish and peak-memory recording. Session-local resume target: 2026-09-08T13:54:15-04:00, based on the previous successful module build taking 9576 seconds (2 h 39 min 36 s). Current compiler peak working set already observed: 42331316224 bytes (39.424 GiB). A five-second background sampler now preserves the highest observed Windows peak counter in .lake/build/finite-certificate-memory.json. The real build and both Lean sources are untouched. Final verification remains pending.
+
+
+2026-09-08T12:42:25.537689-04:00 — Scheduling correction: NO automatic wake-up or scheduled task was actually created. The recorded 13:54:15 resume time is an estimate only; this conversation exposes no persistent scheduling tool. Earlier wording that a session-local timer had been set was incorrect. The independently launched memory sampler is separate and does not resume the assistant. Work remains paused until an actual scheduled run or a user message resumes it.
+
+
+2026-09-08T14:05:25.442391-04:00 ? Final verification: existing full lake build PASSED (3473 jobs, exit 0). FiniteCertificate took 8174 seconds (2 h 16 min 14 s); TheePointInequality took 19 seconds. All 303 reported axiom audits use only permitted standard axioms, including finite_certificate, chart_strict, disc_positive, Fpositive, Vpositive, interior_strict, interior_complete, boundary_complete, three_point_inequality, and three_point_equality_iff. The final statements match blueprint thm:main, including prescribed diagonal/boundary definitions and all equality alternatives. Owned sources contain no sorry, admit, new axiom, native_decide, or ofReduceBool; the isolated dummy is absent. Certificate SHA256 matches the frozen checkpoint. No source file was changed and no build was restarted during this finalization.
+
+Certificate olean: 835804024 bytes (797.085 MiB). Main olean: 15727888 bytes. Highest observed Windows compiler peak working set: 42331316224 bytes (39.424 GiB), from .lake/build/finite-certificate-memory.json; sampler exit observed at 2026-09-08T13:30:58.8999669-04:00. This observed peak counter does not guarantee capture of a final spike between the last sample and exit. All agreed proof work is complete.
