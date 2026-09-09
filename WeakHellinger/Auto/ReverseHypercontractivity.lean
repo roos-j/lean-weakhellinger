@@ -16,6 +16,21 @@ import Mathlib.Tactic
 
 This file imports only Mathlib and introduces no additional axioms.
 Finite probability laws are represented by their nonnegative, normalized atom masses.
+The coefficient is defined by a marginal-KL / minimum-transport-KL infimum.
+For positive reference tables we prove attainment, the equivalent entropy-lifting
+inequality, deterministic and positive stochastic data processing, and product
+lifting. A binary sigmoid optimizer and its curvature bound establish the sharp
+binary symmetric coefficient; tensorization and coordinate projection give
+`sDagger_cubeNoise_closed` for n >= 1 and rho in [-1,1]. Deterministic endpoints
+are proved separately from the positive-table arguments.
+
+Source: the user's reduction proposition and its entropy-infimum definition.
+Background references: Anantharam, Gohari, Kamath and Nair,
+*On Maximal Correlation, Hypercontractivity, and the Data Processing Inequality
+studied by Erkip and Cover* (2013), https://arxiv.org/abs/1304.6133;
+Mossel, Oleszkiewicz and Sen, *On reverse hypercontractivity*,
+https://arxiv.org/abs/1108.1210. The finite entropy-lifting statements below are
+proved directly, without assuming a functional hypercontractivity theorem.
 The required proof order is recorded in `automation/Status.md`.
 -/
 
@@ -2016,6 +2031,151 @@ theorem sDagger_cubeNoise {n : ℕ} (hn : 1 ≤ n) {ρ : ℝ}
     have he' := he.trans (sDagger_binarySymmetric hρ)
     convert! h using 1
     exact he'.symm
+
+/-- A joint law supported on the graph of f has second marginal f applied to its first. -/
+theorem finiteSecond_graph {α β : Type*} [Fintype α] [Fintype β]
+    (μ : FiniteLaw (α × β)) (f : α → β)
+    (hf : ∀ a b, b ≠ f a → μ.mass (a,b)=0) :
+    finiteSecond μ = finiteMap (finiteFirst μ) f := by
+  classical
+  ext b
+  rw [finiteSecond_mass]
+  change (∑ a, μ.mass (a,b)) = ∑ a, if f a=b then (finiteFirst μ).mass a else 0
+  apply Finset.sum_congr rfl
+  intro a _
+  split_ifs with he
+  · rw [finiteFirst_mass]
+    symm
+    apply Finset.sum_eq_single b
+    · intro b' _ hne; exact hf a b' (by simpa [he] using hne)
+    · simp
+  · exact hf a b (Ne.symm he)
+
+/-- Changing a deterministic output marginal while fixing its input incurs infinite KL. -/
+theorem finiteTransportCost_graph {α β : Type*} [Fintype α] [Fintype β]
+    (μ : FiniteLaw (α × β)) (f : α → β)
+    (hf : ∀ a b, b ≠ f a → μ.mass (a,b)=0)
+    (ν : FiniteLaw β) (hν : ν ≠ finiteSecond μ) : finiteTransportCost μ ν = ⊤ := by
+  apply top_unique
+  apply le_sInf
+  rintro v ⟨κ,hκ,rfl⟩
+  have hn : ¬ ∀ z, μ.mass z=0 → κ.mass z=0 := by
+    intro hs
+    have hk : ∀ a b, b ≠ f a → κ.mass (a,b)=0 := fun a b h => hs _ (hf a b h)
+    apply hν
+    exact hκ.2.symm.trans ((finiteSecond_graph κ f hk).trans
+      ((congrArg (fun η => finiteMap η f) hκ.1).trans (finiteSecond_graph μ f hf).symm))
+  unfold finiteKL
+  rw [ite_eq_right hn]
+
+/-- A deterministic channel with a nontrivial admissible output change has coefficient one. -/
+theorem sDagger_graph {α β : Type*} [Fintype α] [Fintype β]
+    (μ : FiniteLaw (α × β)) (f : α → β)
+    (hf : ∀ a b, b ≠ f a → μ.mass (a,b)=0)
+    (ν : FiniteLaw β) (hν : reverseAdmissible μ ν) : sDagger μ = 1 := by
+  have h := reverseComplement_le_ratio μ ν hν
+  rw [finiteTransportCost_graph μ f hf ν hν.1, ENNReal.div_top] at h
+  have he : reverseComplement μ=0 := le_antisymm h bot_le
+  simp [sDagger,he]
+
+/-- Every nonempty cube admits a changed supported marginal, since its marginal is uniform. -/
+theorem cubeNoise_admissible {n : ℕ} (hn : 1 ≤ n) (ρ : ℝ) (hρ : ρ ∈ Set.Icc (-1 : ℝ) 1) :
+    ∃ ν, reverseAdmissible (cubeNoiseLaw n ρ hρ) ν := by
+  classical
+  let ν : FiniteLaw (BooleanCube n) := {
+    mass := fun x => if x=(fun _ => true) then 1 else 0
+    nonneg := fun x => by split_ifs <;> norm_num
+    total := by simp }
+  refine ⟨ν, ?_, ?_⟩
+  · intro he
+    have h := congrArg (fun η : FiniteLaw (BooleanCube n) => η.mass (fun _ => false)) he
+    have hne : (fun _ : Fin n => false) ≠ (fun _ => true) := by
+      intro hh
+      have := congrFun hh ⟨0,hn⟩
+      contradiction
+    have hm := cubeNoiseLaw_second n ρ hρ (fun _ => false)
+    have hpos : 0 < (Fintype.card (BooleanCube n) : ℝ)⁻¹ := inv_pos.mpr (Nat.cast_pos.mpr Fintype.card_pos)
+    change (if (fun _ : Fin n => false)=(fun _ => true) then (1:ℝ) else 0) = _ at h
+    rw [ite_eq_right hne] at h
+    have he0 := h.trans hm
+    linarith
+  · intro x hx
+    have hm := cubeNoiseLaw_second n ρ hρ x
+    have hpos : 0 < (Fintype.card (BooleanCube n) : ℝ)⁻¹ := inv_pos.mpr (Nat.cast_pos.mpr Fintype.card_pos)
+    exact (hpos.ne' (hm.symm.trans hx)).elim
+
+/-- At correlation +1 the output equals the input deterministically. -/
+theorem cubeNoise_graph_one (n : ℕ) (x y : BooleanCube n) (hne : y ≠ x) :
+    (cubeNoiseLaw n 1 (by constructor <;> norm_num)).mass (x,y)=0 := by
+  classical
+  obtain ⟨i,hi⟩ := Function.ne_iff.mp hne
+  change (Fintype.card (BooleanCube n) : ℝ)⁻¹ * cubeNoiseKernel 1 x y=0
+  have hk : cubeNoiseKernel 1 x y=0 := by
+    apply Finset.prod_eq_zero (Finset.mem_univ i)
+    simp [Ne.symm hi]
+  rw [hk,mul_zero]
+
+/-- At correlation -1 the output is the coordinatewise complement of the input. -/
+theorem cubeNoise_graph_neg_one (n : ℕ) (x y : BooleanCube n)
+    (hne : y ≠ fun i => !(x i)) :
+    (cubeNoiseLaw n (-1) (by constructor <;> norm_num)).mass (x,y)=0 := by
+  classical
+  obtain ⟨i,hi⟩ := Function.ne_iff.mp hne
+  have he : x i=y i := by cases hx : x i <;> cases hy : y i <;> simp_all
+  change (Fintype.card (BooleanCube n) : ℝ)⁻¹ * cubeNoiseKernel (-1) x y=0
+  have hk : cubeNoiseKernel (-1) x y=0 := by
+    apply Finset.prod_eq_zero (Finset.mem_univ i)
+    simp [he]
+  rw [hk,mul_zero]
+
+/-- Exact noisy-cube coefficient, including the deterministic correlation endpoints. -/
+theorem sDagger_cubeNoise_closed {n : ℕ} (hn : 1 ≤ n) (ρ : ℝ)
+    (hρ : ρ ∈ Set.Icc (-1 : ℝ) 1) : sDagger (cubeNoiseLaw n ρ hρ)=ρ^2 := by
+  by_cases hp : ρ=1
+  · subst ρ
+    obtain ⟨ν,hν⟩ := cubeNoise_admissible hn 1 hρ
+    simpa using sDagger_graph (cubeNoiseLaw n 1 hρ) id (cubeNoise_graph_one n) ν hν
+  by_cases hm : ρ=-1
+  · subst ρ
+    obtain ⟨ν,hν⟩ := cubeNoise_admissible hn (-1) hρ
+    simpa using sDagger_graph (cubeNoiseLaw n (-1) hρ) (fun x i => !(x i))
+      (cubeNoise_graph_neg_one n) ν hν
+  exact sDagger_cubeNoise hn ⟨lt_of_le_of_ne hρ.1 (Ne.symm hm),lt_of_le_of_ne hρ.2 hp⟩
+
+/-- The binary symmetric output marginal is uniform, including correlation endpoints. -/
+theorem binarySymmetricLaw_second (ρ : ℝ) (hρ : ρ ∈ Set.Icc (-1 : ℝ) 1) :
+    finiteSecond (binarySymmetricLaw ρ hρ)=uniformBool := by
+  ext b
+  rw [finiteSecond_mass]
+  cases b <;> simp [binarySymmetricLaw,uniformBool,bernoulliLaw] <;> ring
+
+/-- Exact binary symmetric coefficient on the whole closed correlation interval. -/
+theorem sDagger_binarySymmetric_closed (ρ : ℝ) (hρ : ρ ∈ Set.Icc (-1 : ℝ) 1) :
+    sDagger (binarySymmetricLaw ρ hρ)=ρ^2 := by
+  let ν := bernoulliLaw 0 (by constructor <;> norm_num)
+  have hadm : reverseAdmissible (binarySymmetricLaw ρ hρ) ν := by
+    constructor
+    · rw [binarySymmetricLaw_second]
+      intro he
+      have h := congrArg (fun η : FiniteLaw Bool => η.mass true) he
+      norm_num [ν,bernoulliLaw,uniformBool] at h
+    · intro b hb
+      rw [binarySymmetricLaw_second] at hb
+      cases b <;> norm_num [uniformBool,bernoulliLaw] at hb
+  by_cases hp : ρ=1
+  · subst ρ
+    have hg : ∀ u v : Bool, v ≠ id u → (binarySymmetricLaw 1 hρ).mass (u,v)=0 := by
+      intro u v hv
+      change v ≠ u at hv
+      simp [binarySymmetricLaw,Ne.symm hv]
+    simpa using sDagger_graph _ id hg ν hadm
+  by_cases hm : ρ=-1
+  · subst ρ
+    have hg : ∀ u v : Bool, v ≠ !u → (binarySymmetricLaw (-1) hρ).mass (u,v)=0 := by
+      intro u v hv
+      cases u <;> cases v <;> simp_all [binarySymmetricLaw]
+    simpa using sDagger_graph _ Bool.not hg ν hadm
+  exact sDagger_binarySymmetric ⟨lt_of_le_of_ne hρ.1 (Ne.symm hm),lt_of_le_of_ne hρ.2 hp⟩
 
 end
 

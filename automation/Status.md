@@ -1,10 +1,10 @@
 # Active target: weak Hellinger reduction
 
-The previous three-point formalization is recorded below. The newly requested reduction is NOT complete.
+Complete: the reduction imports the actual three-point theorem and its final audit uses standard axioms only. The previous three-point formalization is recorded below.
 
 status | exact source location | brief mathematical step | ISO 8601 timestamp with offset
 --- | --- | --- | ---
-in progress | User prop:three-point-implies-main and weak-Hellinger thm:main | Derive the noisy-cube weak Hellinger inequality from the exact three-point theorem | 2026-09-08T21:21:03.480067-04:00
+complete | User prop:three-point-implies-main and weak-Hellinger thm:main | Derive the noisy-cube weak Hellinger inequality from the exact three-point theorem | 2026-09-08T22:54:20.866938-04:00
 
 ## Reverse-hypercontractivity prerequisite
 
@@ -26,15 +26,29 @@ complete | Binary symmetric optimizer | Interior coupling optimizer and exact lo
 complete | Binary symmetric curvature | Optimizer variance bound and entropy cost <= D/(1-rho^2) | 2026-09-08T22:11:45.385580-04:00
 complete | Tensorization | Sequential product coupling and entropy-chain-rule bound | 2026-09-08T22:17:40.581508-04:00
 complete | Sharp coefficient | Small-perturbation lower bound and exact binary-symmetric/noisy-cube s-dagger=rho^2 for -1<rho<1 | 2026-09-08T22:27:35.773831-04:00
-in progress | Boolean law reduction | s,c,d probabilities, domains, and the two expectation identities | 2026-09-08T22:27:35.773831-04:00
-not started | Swap minimizer | Global constrained minimizer, including boundary competitors | 2026-09-08T21:21:03.480067-04:00
-not started | Quotient comparison | Admissible changed marginal for c!=d and 1-s-dagger <= divergence ratio | 2026-09-08T21:21:03.480067-04:00
-not started | Diagonal extension | Stochastic perturbation and normalized-R continuity at c=d | 2026-09-08T21:21:03.480067-04:00
-not started | Degenerate cases | Constant f/g, null events, and rho=+-1 | 2026-09-08T21:21:03.480067-04:00
-not started | Weak Hellinger assembly | Full theorem using only the exact temporary three-point axiom | 2026-09-08T21:21:03.480067-04:00
-not started | Final integration ONLY LAST | Remove axiom/copied definitions, import actual theorem, final build and standard-axiom audit | 2026-09-08T21:21:03.480067-04:00
+complete | Boolean law reduction | s,c,d probabilities, domains, and the two expectation identities | 2026-09-08T22:32:59.683883-04:00
+complete | Swap minimizer | Global constrained minimizer, including boundary competitors | 2026-09-08T22:36:14.591667-04:00
+complete | Quotient comparison | Admissible changed marginal for c!=d and 1-s-dagger <= divergence ratio | 2026-09-08T22:39:03.654132-04:00
+complete | Diagonal extension | Stochastic perturbation and continuity of the Hellinger expression at c=d | 2026-09-08T22:41:35.810609-04:00
+complete | Degenerate cases | Constant f/g, null events, and rho=+-1 | 2026-09-08T22:43:43.111239-04:00
+complete | Weak Hellinger assembly | Full theorem using only the exact temporary three-point axiom | 2026-09-08T22:50:05.109716-04:00
+complete | Final integration ONLY LAST | Remove axiom/copied definitions, import actual theorem, final build and standard-axiom audit | 2026-09-08T22:54:20.866938-04:00
 
 ## Current verification
+
+2026-09-08T22:54:20.866938-04:00 — FINAL COMPLETE. Reduction imports the actual ThreePointInequality and the Mathlib-only ReverseHypercontractivity module. The temporary axiom and copied definition closure are removed. Targeted olean compilation passed for ReverseHypercontractivity, the existing renamed ThreePointInequality, and Reduction; an independent import audit of weak_hellinger, both closed-interval coefficient formulas, and deterministic/stochastic data processing reports only propext, Classical.choice, Quot.sound. No whole-project build or certificate compilation was run. FiniteCertificate source retains frozen SHA256 0c99273c54cbe0affb6b4f6a09c474026b8bae73da98265a079c12b4281dd13e; its existing olean remains 835804024 bytes with unchanged modification time. Reduction is added to the Lake library roots. The final commit also records the previously authorized ThreePointInequality rename and diagnostic cleanup; comparison confirms no mathematical source changes in that rename. Defs.lean, Theorems.lean, and WeakHellinger.lean remain untouched.
+
+2026-09-08T22:50:05.109716-04:00 — Full weak_hellinger theorem passes targeted compilation for all n (including n=0), rho in [-1,1], and Boolean f,g. Audit has only standard axioms plus the EXACT temporary three-point axiom; statement comparison with the real theorem passes. sDagger_cubeNoise_closed and sDagger_binarySymmetric_closed now include deterministic endpoints and audit to standard axioms only. All proof-development rows are complete. Final integration starts now: remove the sole axiom and copied definitions, import the actual theorem, compile targeted modules using the existing frozen certificate artifact.
+
+2026-09-08T22:43:43.111239-04:00 — Degenerate cases complete: constant f has a nonpositive gap; constant g gives exact equality of conditional and unconditional semicircle values, with null fibers contributing zero; rho endpoints follow from the universal gap<=1 bound. Targeted compilation and all three audits pass with standard axioms only. Next: assemble the full noisy-cube theorem.
+
+2026-09-08T22:41:35.810609-04:00 — Diagonal extension complete: the positive biased channel perturbs c and d by distinct amounts, stochastic processing preserves the coefficient bound, and continuity of the final Hellinger expression gives the limit. reduction_diagonal and reduction_positive_law pass targeted checks with only the authorized three-point axiom beyond standard axioms. Next: constants, null fibers and correlation endpoints.
+
+2026-09-08T22:39:03.654132-04:00 — Off-diagonal reduction complete: reduction_complement_quotient has standard axioms only; reduction_R_quotient preserves the exact original definition; reduction_off_diagonal uses only standard axioms plus the single authorized three-point axiom. Targeted compilation and audits pass. Next: stochastic perturbation and the diagonal limit.
+
+2026-09-08T22:36:14.591667-04:00 — Swap minimizer complete: reduction_swap_transport identifies the extended entropy-transport minimum exactly with s D(c|d)+(1-s) D(d|c). The proof covers every feasible competitor, including zero conditional probabilities. Targeted compilation and standard-axiom audit pass. Next: the admissible ratio bound and its exact connection to the original R definition.
+
+2026-09-08T22:32:59.683883-04:00 — Boolean-law reduction complete: every positive binary law has the specified s,c,d table, both expectation identities and passage to the output joint law are checked, and nonconstant Boolean outputs satisfy sDagger<=rho^2. All five target audits use standard axioms only. For the diagonal, pass to the limit in the final Hellinger expression after proving the off-diagonal inequality; this avoids any need to prove continuity of normalized R. Next: identify the swapped table with the attained entropy minimum.
 
 2026-09-08T22:27:35.773831-04:00 — Sharpness complete for -1<rho<1: the entropy ratio along nonzero sigmoid tilts converges to 1-rho^2 by derivative comparison and l’Hôpital; coordinate projection transfers the lower bound to every n>=1. sDagger_binarySymmetric and sDagger_cubeNoise pass targeted compilation and standard-axiom audits. Endpoint weak Hellinger cases remain in the degenerate-case row. Next: Boolean probability and expectation identities.
 

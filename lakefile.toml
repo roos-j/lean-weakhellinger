@@ -10,4 +10,4 @@ rev = "572e4d091bcee94b35bdae44ff5a55687740f7c9"
 
 [[lean_lib]]
 name = "WeakHellinger"
-roots = ["WeakHellinger.Auto.FiniteCertificate", "WeakHellinger.Auto.TheePointInequality"]
+roots = ["WeakHellinger.Auto.FiniteCertificate", "WeakHellinger.Auto.ThreePointInequality", "WeakHellinger.Auto.Reduction"]

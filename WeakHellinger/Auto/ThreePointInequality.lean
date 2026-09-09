@@ -3123,8 +3123,6 @@ theorem polyEval_halfZero (p : IntPolynomial) (i : Fin 3) (x : ℝ × ℝ × ℝ
       have hm := halfZero_monomial t.1 i n (hbound t (by simp)) x
       linear_combination (t.2 : ℝ) * hm
 
-#print axioms polyEval_halfZero
-
 private theorem polyEval_map_range (f : ℕ → Exponent × ℤ) (n : ℕ) (x : ℝ × ℝ × ℝ) :
     polyEval ((List.range n).map f) x = ∑ h ∈ Finset.range n,
       ((f h).2 : ℝ) * monomialEval (f h).1 x := by
@@ -3204,7 +3202,6 @@ theorem polyEval_halfSubstitute (p : IntPolynomial) (i : Fin 3) (δ : ℤ) (x : 
           ih (fun t ht => hbound t (by simp [ht]))]
         simp only [polyEval]
         ring
-
 
 /-- Blueprint `lem:rational-param`: the corresponding rational square root. -/
 noncomputable def rationalRoot (j : ℝ) : ℝ := (1 - j ^ 2) / (1 + j ^ 2)
@@ -4004,231 +4001,6 @@ set_option Elab.async false
 
 set_option Elab.async false
 
-#print axioms chart_center_image
-#print axioms cachedBernstein_eq
-#print axioms chartCheck_sound
-#print axioms baseF_reconstruction
-#print axioms baseH_reconstruction
-#print axioms all_check_sound
-#print axioms supportCheck_sound
-#print axioms coefficientCheck_sound
-#print axioms witnessCheck_sound
-#print axioms polyDivide_sound
-#print axioms rationalConvert_sound
-#print axioms rationalEval_F
-#print axioms rationalEval_K
-#print axioms rationalEval_Q
-#print axioms rationalEval_gap
-#print axioms chart_open_domain
-#print axioms continuous_rationalV
-#print axioms continuous_chartMap
-#print axioms chart_restrictions
-#print axioms chart_monomial_pos
-#print axioms negative_chart_coverage
-#print axioms positive_chart_coverage
-#print axioms chart_factor_evaluations
-#print axioms chart_factors_pos
-#print axioms chart_z_mem
-#print axioms inverse_coordinates_recover
-#print axioms rootQ_pos
-#print axioms rationalQ_pos
-#print axioms Xi_rootQ
-#print axioms certificateLower_root_identity
-#print axioms positive_of_squared_gap
-#print axioms certificateLower_pos_of_squared
-#print axioms remaining_root_domain
-#print axioms rootQ_coordinates
-#print axioms rootQ_pos_sqrt
-#print axioms rootParameter_mem
-#print axioms rational_parameter_inverse
-#print axioms rationalV_mem
-#print axioms r_rationalV
-#print axioms rationalV_threshold_factor
-#print axioms rationalV_thresholds
-#print axioms polyEval_halfMonomial
-#print axioms polyEval_halfSubstitute
-#print axioms monomialEval_substitute
-#print axioms polyEval_monomialSubstitute
-#print axioms polyEval_clearSubstitute
-#print axioms polyEval_eq_coefficient_sum
-#print axioms homogeneousEval_eq
-#print axioms homogeneousEval_sign
-#print axioms bernsteinPasses_eq_box
-#print axioms bernsteinTransform_eq_coefficient
-#print axioms bernsteinCoefficient_eq_box
-#print axioms mem_exponentBox
-#print axioms monomial_bernstein_expansion_three
-#print axioms polyEval_bernstein
-#print axioms bernsteinBasis_nonneg
-#print axioms polyEval_nonneg_of_bernstein
-#print axioms polyEval_pos_of_bernstein
-#print axioms monomial_bernstein_expansion
-#print axioms rationalConversionCheck_sound
-#print axioms rational_denominator_pos
-#print axioms rationalEval_ofPolynomial
-#print axioms rationalEval_neg
-#print axioms rationalEval_mul
-#print axioms rationalEval_divNat
-#print axioms rationalEval_pow
-#print axioms polyEval_bases
-#print axioms rationalEval_add
-#print axioms polyDivisionCheck_sound
-#print axioms polyDivisionCheck_sign
-#print axioms polyBound_degree
-#print axioms polyBound_insert
-#print axioms polyBound_normalize
-#print axioms polyBound_add
-#print axioms polyBound_mul
-#print axioms polyEval_of_normalize_eq
-#print axioms polyEval_variables
-#print axioms polyEval_insert
-#print axioms polyEval_normalize
-#print axioms polyEval_add
-#print axioms polyEval_neg
-#print axioms polyEval_mul
-#print axioms polyEval_const
-#print axioms polyEval_pow
-#print axioms polyEval_scale
-#print axioms H_difference_coordinates
-#print axioms Psi_le_V
-#print axioms Gamma_lower_bound
-#print axioms A_sub_wE_split
-#print axioms normalized_V_split
-#print axioms Psi_coefficient
-#print axioms A_le_Astar
-#print axioms PhiMinus_le_V
-#print axioms PhiPlus_le_V
-#print axioms coordinate_Y_sub_Z
-#print axioms B_normalized
-#print axioms hasDerivAt_C_fixed
-#print axioms hasDerivAt_C_sq_mul_B
-#print axioms hasDerivAt_B_normalized
-#print axioms hasDerivAt_e_fixed
-#print axioms wCoord_eq
-#print axioms wCoord_bounds
-#print axioms Xi_explicit
-#print axioms Xi_bounds
-#print axioms artanh_eq_mul_H
-#print axioms LJ_eq_H
-#print axioms E_integrand_bounds
-#print axioms E_bounds
-#print axioms M_eq_H
-#print axioms E_eq_H
-#print axioms M_bounds
-#print axioms hasDerivAt_B_fixed
-#print axioms B_explicit
-#print axioms e_explicit
-#print axioms hasDerivAt_L
-#print axioms hasDerivAt_J
-#print axioms hasDerivAt_T
-#print axioms k_logarithm_formulas
-#print axioms L_neg_first
-#print axioms J_neg_first
-#print axioms hasDerivAt_kPrimitive
-#print axioms integral_kPrimitive
-#print axioms k_eq_logarithms
-#print axioms k_eq_integral
-#print axioms L_eq_artanh_coordinate
-#print axioms J_eq_artanh_coordinate
-#print axioms rational_coordinate_roots
-#print axioms coordinates_roots
-#print axioms inverse_coordinates_domain
-#print axioms inverse_coordinates_values
-#print axioms coordinates_T
-#print axioms inverse_coordinate_sums
-#print axioms coordinates_sums
-#print axioms coordinates_root_sq
-#print axioms coordinate_ranges
-#print axioms coordinates_inverse
-#print axioms coordinates_mem
-#print axioms coordinates_product
-#print axioms coordinates_P
-#print axioms spatial_quantities_pos
-#print axioms r_sub_eq_T_add
-#print axioms r_add_eq_T_sub
-#print axioms S_eq_T_sq_sub
-#print axioms T_sq_eq
-#print axioms one_sub_sq_eq_T_sq_add
-#print axioms T_sq_product
-#print axioms diagonal_equality_iff
-#print axioms C_zero_a
-#print axioms reducedR_zero_a
-#print axioms C_one_t
-#print axioms C_neg_one_t
-#print axioms reducedR_one_t
-#print axioms reducedR_neg_one_t
-#print axioms k_zero_b
-#print axioms reducedR_diagonal
-#print axioms diagonal_gap
-#print axioms reducedR_le_C_diagonal
-#print axioms R_eq_reducedR
-#print axioms reducedR_sq
-#print axioms exists_normalized_triple
-#print axioms normalized_coordinates_mem
-#print axioms k_ge_two
-#print axioms B_ge_two
-#print axioms C_pos
-#print axioms three_point_iff_R_le_C
-#print axioms R_exchange
-#print axioms R_complement
-#print axioms originalC_exchange
-#print axioms originalC_complement
-#print axioms equalityCase_exchange
-#print axioms equalityCase_complement
-#print axioms centered_coordinates
-#print axioms C_eq_originalC
-#print axioms B_eq_Rdenominator
-#print axioms R_sq_reduced
-#print axioms continuousOn_R
-#print axioms pq_mem
-#print axioms Rdenominator_ge_two
-#print axioms R_sq
-#print axioms divergence_denominator_pos
-#print axioms R_sq_eq_divergence_ratio
-#print axioms H_difference_log_bound
-#print axioms two_mul_log_le_sub_inv
-#print axioms H_difference_bounds
-#print axioms I_integrand_bounds
-#print axioms I_bounds
-#print axioms H_lower_bound
-#print axioms hasDerivAt_HComparison
-#print axioms HComparison_nonneg
-#print axioms H_upper_bound
-#print axioms hasDerivAt_H
-#print axioms H_sub_one_bounds
-#print axioms continuousOn_H
-#print axioms H_zero
-#print axioms I_zero
-#print axioms H_eq_artanh
-#print axioms mul_I_eq
-#print axioms continuousAt_K
-#print axioms continuousOn_K
-#print axioms K_sub_le_of_margin
-#print axioms K_ge_two
-#print axioms K_complement
-#print axioms K_le_of_margin
-#print axioms K_eq_integral
-#print axioms D_eq_integral
-#print axioms unit_interval_remainder
-#print axioms artanh_neg
-#print axioms artanh_zero
-#print axioms hasDerivAt_artanh
-#print axioms artanh_add_argument
-#print axioms artanh_add
-#print axioms artanh_sub_argument
-#print axioms artanh_sub
-
-#print axioms r_nonneg
-#print axioms r_le_one
-#print axioms r_neg
-#print axioms r_sq
-#print axioms r_pos
-#print axioms r_eq_one_iff
-#print axioms r_eq_zero_iff
-#print axioms r_eq_iff_sq_eq
-#print axioms continuous_r
-#print axioms hasDerivAt_r
-
 /-- Blueprint `lem:chart-strict`: a prescribed witness has positive Bernstein basis
 on every required face, including zero or unit time and spatial boundary faces. -/
 theorem chart_positive_witness (c : Chart) {x : ℝ × ℝ × ℝ}
@@ -4324,9 +4096,6 @@ theorem chart_strict (c : Chart) {x : ℝ × ℝ × ℝ} (hx : InUnitCube x)
   rcases hw t ht with ⟨hbox, hv, he⟩
   exact polyEval_pos_of_bernstein hp hc hx t.1 hbox (by rw [he]; exact hv) hpos
 
-#print axioms chart_positive_witness
-#print axioms chart_strict
-
 /-- Blueprint `lem:disc-positive`: recover positivity before a checked division. -/
 theorem polyDivideCandidate_positive {p q candidate h : IntPolynomial}
     (hs : polyDivideCandidate p q candidate = some h) (x : ℝ × ℝ × ℝ)
@@ -4390,8 +4159,6 @@ theorem negative_baseH_positive (c : Chart)
       exact mul_pos (sq_pos_of_pos hr.1.1) (sq_pos_of_pos hr.2)
     have ht := polyDivideCandidate_positive hs x hq hp
     simpa [polyEval_monomialSubstitute, monomialEval, chartMap, mul_comm] using ht
-#print axioms negative_baseH_positive
-
 
 /-- Blueprint `lem:disc-positive`: the cleared positive time coordinate. -/
 theorem positive_clear_point (x : ℝ × ℝ × ℝ) :
@@ -4479,7 +4246,6 @@ theorem positive_baseH_positive (c : Chart)
       (polyAdd polyN0 (polyMul polyPminus polyTau)) polyD0 y hD hclear
     rw [boundary_clear_point] at hpos
     exact polyDivideCandidate_positive hdiv _ hP0 hpos
-#print axioms positive_baseH_positive
 
 /-- Blueprint `lem:rational`: the prescribed base-F denominator is positive. -/
 theorem baseF_denominator_pos (c : CertificateCase) (x : ℝ × ℝ × ℝ) :
@@ -4518,7 +4284,6 @@ theorem disc_positive (c : Chart) {x : ℝ × ℝ × ℝ} (hx : InUnitCube x)
   rw [← baseH_reconstruction (chartCase c)
     (chartCheck_sound c (finite_certificate c).1).2.1 (chartMap c x)]
   exact div_pos hp (baseH_denominator_pos _ _)
-#print axioms disc_positive
 
 /-- Blueprint `lem:Fpositive`: evaluation of a fixed integer polynomial is continuous. -/
 theorem continuous_polyEval (p : IntPolynomial) : Continuous (polyEval p) := by
@@ -4657,7 +4422,6 @@ theorem Fpositive (c : Chart) {x : ℝ × ℝ × ℝ} (hx : InUnitCube x)
   obtain ⟨t, ht, he⟩ := intermediate_value_Icc (by norm_num : (0 : ℝ) ≤ 1) hf.continuousOn
     (show (0 : ℝ) ∈ Set.Icc (f 0) (f 1) from ⟨hle, h1.le⟩)
   exact hn t ht he
-#print axioms Fpositive
 
 /-- Blueprint `lem:Vpositive`: apply a chart certificate at the inverse rational
 parameters and the matching signed time. -/
@@ -4724,7 +4488,6 @@ theorem Vpositive {a b u : ℝ} (ha : 0 < a) (hb : 0 < b) (hab : a + b < 1)
       have htime : zCoord a b ≤ u/a := by
         simpa only [chartZ, hv.1, hy.1, zCoord] using hr.2.2
       exact lt_of_lt_of_le hl (Psi_le_V ha hb hab hu hvlarge hylarge htime)
-#print axioms Vpositive
 
 /-- Blueprint `lem:Vpositive`: the full fixed-u derivative is strictly positive. -/
 theorem fixed_u_derivative_pos {a b u : ℝ} (ha : 0 < a) (hb : 0 < b)
@@ -4738,7 +4501,6 @@ theorem fixed_u_derivative_pos {a b u : ℝ} (ha : 0 < a) (hb : 0 < b)
   have hsp := spatial_quantities_pos ha.le hb.le hab
   exact mul_pos (div_pos (mul_pos (mul_pos (mul_pos (by norm_num) ha) hsp.2.2.1) hC)
     (sq_pos_of_pos hsp.2.2.2)) (Vpositive ha hb hab hu)
-#print axioms fixed_u_derivative_pos
 
 /-- Blueprint `lem:interior-strict`: continuity of k in the first centered coordinate. -/
 theorem continuousAt_k_fixed {h b : ℝ} (hh : |h| + |b| < 1) :
@@ -4847,7 +4609,6 @@ theorem interior_strict {a b t : ℝ} (ha : 0 < a) (hb : 0 < b)
     rw [reducedR_sq ha.le hb.le hab htmem]
     exact (div_lt_iff₀ hB).mpr hm
   nlinarith [reducedR_nonneg a b t]
-#print axioms interior_strict
 
 /-- Blueprint `lem:interior-complete`: the reduced inequality and all equality
 cases on the normalized interior spatial domain. -/
@@ -4908,7 +4669,6 @@ theorem interior_complete {s c d : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1)
   rw [← R_eq_reducedR hs' hc' hd', C_eq_originalC] at h
   rw [normalized_equality_iff] at h
   simpa only [hR, hC, heq] using h
-#print axioms interior_complete
 
 /-- Blueprint `lem:boundary`: the exceptional boundary branches have C=1. -/
 theorem originalC_exceptional {s c d : ℝ} (h : s = 0 ∨ s = 1 ∨ c + d = 1) :
@@ -5019,7 +4779,6 @@ theorem boundary_complete {s c d : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1)
       · exact (hs1 he).elim
       · exact (hsum he).elim
       · exact (boundary_diagonal_C_zero hc hd hboundary he hdiag).symm
-#print axioms boundary_complete
 
 /-- Blueprint `thm:main`: the comparison inequality on the entire closed cube,
 with its complete equality characterization, combining interior and boundary. -/
@@ -5052,9 +4811,5 @@ theorem three_point_equality_iff {s c d : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1)
     unfold originalC
     constructor <;> intro h <;> linarith
   exact he.trans (three_point_comparison hs hc hd).2
-
-#print axioms three_point_comparison
-#print axioms three_point_inequality
-#print axioms three_point_equality_iff
 
 end Auto
