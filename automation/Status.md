@@ -22,11 +22,11 @@ complete | Finite KL prerequisites | Continuity, positivity, KL contraction and 
 complete | Entropy transport attainment | Feasible coupling polytope, minimum and marginal KL lower bound | 2026-09-08T21:41:09.540393-04:00
 complete | Reverse coefficient characterization | Equivalence with entropy lifting; range and degenerate conventions | 2026-09-08T21:46:48.405784-04:00
 complete | Data processing | Deterministic and stochastic output maps via lifted target laws and KL contraction | 2026-09-08T21:53:33.806318-04:00
-in progress | Binary symmetric optimizer | Interior coupling optimizer and exact log-odds stationarity | 2026-09-08T21:53:33.806318-04:00
-not started | Binary symmetric curvature | Optimizer variance bound and entropy cost <= D/(1-rho^2) | 2026-09-08T21:21:03.480067-04:00
-not started | Tensorization | Sequential product coupling and entropy-chain-rule bound | 2026-09-08T21:21:03.480067-04:00
-not started | Sharp coefficient | Small-perturbation lower bound and exact binary-symmetric/noisy-cube s-dagger=rho^2 | 2026-09-08T21:21:03.480067-04:00
-not started | Boolean law reduction | s,c,d probabilities, domains, and the two expectation identities | 2026-09-08T21:21:03.480067-04:00
+complete | Binary symmetric optimizer | Interior coupling optimizer and exact log-odds stationarity | 2026-09-08T22:00:38.510479-04:00
+complete | Binary symmetric curvature | Optimizer variance bound and entropy cost <= D/(1-rho^2) | 2026-09-08T22:11:45.385580-04:00
+complete | Tensorization | Sequential product coupling and entropy-chain-rule bound | 2026-09-08T22:17:40.581508-04:00
+complete | Sharp coefficient | Small-perturbation lower bound and exact binary-symmetric/noisy-cube s-dagger=rho^2 for -1<rho<1 | 2026-09-08T22:27:35.773831-04:00
+in progress | Boolean law reduction | s,c,d probabilities, domains, and the two expectation identities | 2026-09-08T22:27:35.773831-04:00
 not started | Swap minimizer | Global constrained minimizer, including boundary competitors | 2026-09-08T21:21:03.480067-04:00
 not started | Quotient comparison | Admissible changed marginal for c!=d and 1-s-dagger <= divergence ratio | 2026-09-08T21:21:03.480067-04:00
 not started | Diagonal extension | Stochastic perturbation and normalized-R continuity at c=d | 2026-09-08T21:21:03.480067-04:00
@@ -35,6 +35,14 @@ not started | Weak Hellinger assembly | Full theorem using only the exact tempor
 not started | Final integration ONLY LAST | Remove axiom/copied definitions, import actual theorem, final build and standard-axiom audit | 2026-09-08T21:21:03.480067-04:00
 
 ## Current verification
+
+2026-09-08T22:27:35.773831-04:00 — Sharpness complete for -1<rho<1: the entropy ratio along nonzero sigmoid tilts converges to 1-rho^2 by derivative comparison and l’Hôpital; coordinate projection transfers the lower bound to every n>=1. sDagger_binarySymmetric and sDagger_cubeNoise pass targeted compilation and standard-axiom audits. Endpoint weak Hellinger cases remain in the degenerate-case row. Next: Boolean probability and expectation identities.
+
+2026-09-08T22:17:40.581508-04:00 — Tensorization complete: a sequential coupling handles arbitrary correlated target marginals, and its KL chain rule preserves the lifting coefficient under independent products. Reindexing and the exact noisy-cube successor identity establish entropyLifting_cubeNoise for every dimension and -1<rho<1. Consequently sDagger_cubeNoise_le proves the needed upper bound rho^2. Targeted compilation and audits pass with standard axioms. Next: small-perturbation sharpness and the exact coefficient formula requested by the user.
+
+2026-09-08T22:11:45.385580-04:00 — Binary-channel entropy lifting complete: an exact nonnegative rational factorization proves the conditional-variance curvature bound; derivative comparison proves the entropy bound for all finite tilts, and limits cover both endpoint target laws. The logistic reference is proved equal to the binary symmetric probability table with the specified rho. entropyLifting_binarySymmetric proves factor 1-rho^2 for every -1<rho<1 using only standard axioms. Targeted compilation/audits passed. Next: product tensorization and the noisy-cube lifting bound.
+
+2026-09-08T22:00:38.510479-04:00 — Binary-symmetric optimizer complete: common sigmoid/log-odds tilts realize every interior target marginal; the log-density ratio separates into the two constrained marginal potentials. A proved finite KL Pythagorean identity establishes global optimality against all feasible competitors, including boundary competitors. Targeted compilation and audits pass with standard axioms. Next: the curvature/entropy bound and its endpoint extension.
 
 2026-09-08T21:53:33.806318-04:00 — Data processing complete on the positive effective-support domains needed by the reduction: reference-conditional target lifts preserve output marginals and exact KL cost; deterministic sDagger_map_le and positive stochastic right-channel sDagger_rightChannel_le pass targeted compilation and standard-axiom audits. The stochastic theorem covers the biased output perturbation for c=d. Next: construct the binary-symmetric entropy optimizer.
 
