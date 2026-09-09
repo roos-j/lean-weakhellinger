@@ -1,3 +1,57 @@
+# Active target: weak Hellinger reduction
+
+The previous three-point formalization is recorded below. The newly requested reduction is NOT complete.
+
+status | exact source location | brief mathematical step | ISO 8601 timestamp with offset
+--- | --- | --- | ---
+in progress | User prop:three-point-implies-main and weak-Hellinger thm:main | Derive the noisy-cube weak Hellinger inequality from the exact three-point theorem | 2026-09-08T21:21:03.480067-04:00
+
+## Reverse-hypercontractivity prerequisite
+
+User-authorized file: WeakHellinger/Auto/ReverseHypercontractivity.lean, importing Mathlib only. The reduction needs the entropy-lifting coefficient, data processing, and its binary-symmetric product value. These substantial information-theoretic facts are absent from the searched Mathlib sources; ordinary KL data processing alone does not establish them. Prove them for finite laws/channels so they apply to arbitrary Boolean output functions and the stochastic perturbation needed at c=d. They may not be introduced as axioms.
+
+## Forward proof order
+
+Each row depends only on earlier rows (the main-target row is an overview). Only the first unfinished item is active. Rows for previously checked isolated Reduction lemmas remain pending until their incoming prerequisites and source interfaces have been verified.
+
+status | exact source location | brief mathematical step | ISO 8601 timestamp with offset
+--- | --- | --- | ---
+complete | Reduction setup | Finite probability laws, KL, noisy-cube law, expectations and conditional expectations | 2026-09-08T21:27:31.246848-04:00
+complete | Reverse coefficient definition | Entropy transportation cost and exact infimum formula for s-dagger | 2026-09-08T21:29:35.420375-04:00
+complete | Finite KL prerequisites | Continuity, positivity, KL contraction and chain rule with support conditions | 2026-09-08T21:36:23.545284-04:00
+complete | Entropy transport attainment | Feasible coupling polytope, minimum and marginal KL lower bound | 2026-09-08T21:41:09.540393-04:00
+complete | Reverse coefficient characterization | Equivalence with entropy lifting; range and degenerate conventions | 2026-09-08T21:46:48.405784-04:00
+complete | Data processing | Deterministic and stochastic output maps via lifted target laws and KL contraction | 2026-09-08T21:53:33.806318-04:00
+in progress | Binary symmetric optimizer | Interior coupling optimizer and exact log-odds stationarity | 2026-09-08T21:53:33.806318-04:00
+not started | Binary symmetric curvature | Optimizer variance bound and entropy cost <= D/(1-rho^2) | 2026-09-08T21:21:03.480067-04:00
+not started | Tensorization | Sequential product coupling and entropy-chain-rule bound | 2026-09-08T21:21:03.480067-04:00
+not started | Sharp coefficient | Small-perturbation lower bound and exact binary-symmetric/noisy-cube s-dagger=rho^2 | 2026-09-08T21:21:03.480067-04:00
+not started | Boolean law reduction | s,c,d probabilities, domains, and the two expectation identities | 2026-09-08T21:21:03.480067-04:00
+not started | Swap minimizer | Global constrained minimizer, including boundary competitors | 2026-09-08T21:21:03.480067-04:00
+not started | Quotient comparison | Admissible changed marginal for c!=d and 1-s-dagger <= divergence ratio | 2026-09-08T21:21:03.480067-04:00
+not started | Diagonal extension | Stochastic perturbation and normalized-R continuity at c=d | 2026-09-08T21:21:03.480067-04:00
+not started | Degenerate cases | Constant f/g, null events, and rho=+-1 | 2026-09-08T21:21:03.480067-04:00
+not started | Weak Hellinger assembly | Full theorem using only the exact temporary three-point axiom | 2026-09-08T21:21:03.480067-04:00
+not started | Final integration ONLY LAST | Remove axiom/copied definitions, import actual theorem, final build and standard-axiom audit | 2026-09-08T21:21:03.480067-04:00
+
+## Current verification
+
+2026-09-08T21:53:33.806318-04:00 — Data processing complete on the positive effective-support domains needed by the reduction: reference-conditional target lifts preserve output marginals and exact KL cost; deterministic sDagger_map_le and positive stochastic right-channel sDagger_rightChannel_le pass targeted compilation and standard-axiom audits. The stochastic theorem covers the biased output perturbation for c=d. Next: construct the binary-symmetric entropy optimizer.
+
+2026-09-08T21:46:48.405784-04:00 — Reverse coefficient characterization complete: complement <=1, sDagger in [0,1], positive costs for nontrivial supported marginals, and entropyLifting_iff for positive reference tables pass targeted compilation and standard-axiom audits. The no-admissible-marginal convention gives sDagger=0. Next: deterministic and stochastic data processing of the reverse coefficient.
+
+2026-09-08T21:41:09.540393-04:00 — Entropy transport attainment complete for positive reference tables: compact feasible probability polytope, continuous KL minimum, attained extended cost, finite cost, marginal KL lower bound, and exact equality with the conditional-law infimum all pass targeted checks with only standard axioms. This includes boundary competitors and null rows of the changed law. Next: coefficient range and entropy-lifting characterization.
+
+2026-09-08T21:36:23.545284-04:00 — Finite KL prerequisites complete: Gibbs nonnegativity and strict positivity, log-sum inequality, extended-valued deterministic KL data processing, continuity for positive reference vectors, finite conditional disintegration, and the KL chain rule all passed targeted compilation and standard-axiom audits. With fixed first marginal, joint KL equals the expected conditional KL cost exactly. Next: compactness and attainment of the entropy transportation minimum.
+
+2026-09-08T21:29:35.420375-04:00 — Reverse coefficient definitions passed targeted compilation and standard-axiom audits. The transport cost fixes the first marginal and prescribes the second; sDagger is defined by the entropy ratio infimum on the effective support, with value zero when no nontrivial changed marginal exists. Its range, data processing, equality with the conditional-law formulation, and cube formula remain separate unproved obligations in subsequent rows. Next: finite KL prerequisites.
+
+2026-09-08T21:27:31.246848-04:00 — Reduction setup complete: targeted ReverseHypercontractivity.lean compilation and audits passed. Finite laws and pushforward expectations are normalized; the noisy-cube kernel is symmetric/stochastic, both marginals are uniform, and extended KL and finite conditional semicircle expectations are defined with explicit zero-mass conventions. Audits use only propext, Classical.choice, Quot.sound. Next: the entropy transport and reverse coefficient definitions.
+
+2026-09-08T21:21:03.480067-04:00 — Mathematical dependency plan recorded. Reduction.lean has a targeted successful Lean check of the copied definition closure, the EXACT single authorized three-point axiom, the final algebraic implication conditional on a channel bound, KL nonnegativity, and the exact swap-minimizer proof. These isolated results do not supply the reverse-hypercontractivity prerequisite or the full theorem. No certificate import, certificate edit, or whole-project build was performed. Final axiom removal and actual-theorem integration are explicitly deferred to the last row.
+
+# Completed earlier effort: three-point inequality
+
 # Main target
 
 Complete: the existing full real-certificate build passed, including the closed-cube inequality and every equality case. Final audits use only propext, Classical.choice, and Quot.sound; no temporary axiom remains.

@@ -62,3 +62,6 @@ For kernel performance, normalization now sorts the input terms in decreasing le
 
 
 2026-09-08T14:05:25.442391-04:00 ? Final resolution: the existing full extracted-module Lake build succeeded (3473 jobs). The real finite_certificate and both final main theorems audit to only propext, Classical.choice, Quot.sound. The extraction validation gate and all downstream proof gates are closed. No dummy axiom remains, no new source discrepancy was found, and the frozen certificate was not modified.
+
+
+2026-09-08T21:21:03.480067-04:00 — Reduction sketch, degenerate cases: when c=d, p=q, so the proposed changed marginal is excluded from the infimum defining the reverse coefficient. The interior optimizer argument alone cannot cover that case. Plan: prove stochastic data processing, bias the V output with a vanishing independent randomization to obtain c!=d, and pass to the continuous normalized-R limit. Constant f/g and rho endpoints require separate arguments. This is an omitted proof obligation, not a change to the weak Hellinger statement. Mathlib search found ordinary KL data processing but no reverse-hypercontractivity/tensorization/noisy-cube coefficient theorem; these inputs remain to be proved without extra axioms.
