@@ -1,3 +1,7 @@
+# Agent instruction routing
+
+2026-09-09T07:57:41.252743-04:00 (recording time): Maintain a root AGENTS.md directing agents to the Codex autoformalize skill, with applicable local instructions in automation/ taking precedence over the skill. Both the repository and user-folder Codex skill copies must create AGENTS.md automatically if absent, preserving existing files.
+
 # Completed effort: weak Hellinger reduction
 
 Updated: 2026-09-08T22:54:20.866938-04:00 (recording time). Raw user prompts remain in ignored automation/raw.md.
