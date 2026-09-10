@@ -1,4 +1,4 @@
-import WeakHellinger.Auto.ThreePointInequality
+import WeakHellinger.Theorems
 
-#print axioms Auto.three_point_inequality
-#print axioms Auto.weak_hellinger
+#print axioms WeakHellinger.three_point_inequality
+#print axioms WeakHellinger.weak_hellinger
