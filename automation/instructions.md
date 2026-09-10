@@ -1,3 +1,11 @@
+# Current task: manual weak Hellinger statement
+
+2026-09-10T17:13:34.553976-04:00 (recording time): Formulate the supplied weak Hellinger theorem in WeakHellinger/Theorems.lean, close to the source, introducing Boolean functions, uniform expectation and noisy conditional expectation in WeakHellinger/Defs.lean. The user explicitly authorizes these manual files and their WeakHellinger namespace. This is statement scaffolding with a sorry, not a proof-completion request. Use arbitrary natural n, including zero, and rho in [-1,1], following the subsequent user correction. Model the cube by Fin n -> Fin 2 (0 represents -1, 1 represents +1), as corrected by the user, real-valued sign-valued functions, finite uniform averages and the independent coordinate noise kernel. Preserve existing declarations. No full build, certificate rebuild, or commit. Raw prompt in automation/raw.md.
+
+# Current Lake layout requirement
+
+2026-09-10T17:03:22.054764-04:00 (recording time): The user requires the default whole-module library root ALWAYS: omit `roots`, or set it only to `["WeakHellinger"]`. Maintain the usual top-level `WeakHellinger.lean` importing the production Lean modules, including manual and Auto modules. Never list individual files in `roots` or bypass the import file with `globs`. This supersedes older instructions below to add modules to Lake roots. Creating and maintaining the top-level import file is authorized. The current task updates the repository and user-folder autoformalize skills and their paired edition; no project build or Git commit is requested. See the matching entry in `automation/raw.md`.
+
 # Agent instruction routing
 
 2026-09-09T07:57:41.252743-04:00 (recording time): Maintain a root AGENTS.md directing agents to the Codex autoformalize skill, with applicable local instructions in automation/ taking precedence over the skill. Both the repository and user-folder Codex skill copies must create AGENTS.md automatically if absent, preserving existing files.
@@ -51,3 +59,21 @@ Commit only when automation/Status.md is updated. The final commit accompanies i
 
 
 2026-09-08T20:40:58.878634-04:00 ? User authorized renaming TheePointInequality.lean to ThreePointInequality.lean, superseding the old spelling requirement. Update module imports and Lake roots. Preserve source content and FiniteCertificate.lean. Do not launch a build or commit; Status.md is unchanged. Existing compiled artifacts under the old module name are not renamed or treated as artifacts of the new module.
+
+2026-09-10T17:14:01.761793-04:00 (recording time): User correction: use Fin n -> Fin 2, not Fin n -> Bool. See automation/raw.md.
+
+2026-09-10T17:15:36.373371-04:00 (recording time): Copy BooleanFunc and BooleanValued from ../lean-booleanfun: BooleanFunc n is an arbitrary real-valued function on Fin n -> Fin 2; BooleanValued is a Prop structure with one_or_neg_one. Replace the bundled subtype and use explicit BooleanValued hypotheses in weak_hellinger. Coordinate sign convention agrees with the source Walsh characters: 0 represents +1 and 1 represents -1, superseding the earlier encoding convention.
+
+2026-09-10T17:16:55.404886-04:00 (recording time): User requested removing the 1 <= n hypothesis from weak_hellinger; include n=0 and update its docstring.
+
+## 2026-09-10T17:19:43.807777-04:00 (recording time)
+
+Add expectation and conditional-expectation notation scoped to WeakHellinger and use it in the manual weak Hellinger statement.
+
+## 2026-09-10T17:20:54.616144-04:00 (recording time)
+
+Rename the manual BooleanCube definition and uses to HammingCube. BooleanFunc n has domain HammingCube n.
+
+## 2026-09-10T17:22:21.123237-04:00 (recording time)
+
+Use a Prop-valued def for BooleanValued: forall x, f x = 1 or f x = -1. This supersedes the previously copied structure.
