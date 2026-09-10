@@ -644,4 +644,132 @@ theorem weak_hellinger (n : ℕ) (ρ : ℝ) (hρ : ρ ∈ Set.Icc (-1 : ℝ) 1)
 
 end
 
+noncomputable section
+open scoped Classical
+
+/-! ## Bridges to the manual Hamming-cube formulation -/
+
+/-- Coordinatewise identification with the manual Fin 2 cube. -/
+def manualCubeEquiv (n : ℕ) : BooleanCube n ≃ WeakHellinger.HammingCube n :=
+  Equiv.piCongrRight fun _ => finTwoEquiv.symm
+
+/-- The independent-coordinate kernels agree under the cube identification. -/
+theorem manual_noiseKernel {n : ℕ} (ρ : ℝ) (x y : BooleanCube n) :
+    WeakHellinger.noiseKernel ρ (manualCubeEquiv n x) (manualCubeEquiv n y) = cubeNoiseKernel ρ x y := by
+  unfold WeakHellinger.noiseKernel cubeNoiseKernel
+  apply Finset.prod_congr rfl
+  intro i _
+  simp [manualCubeEquiv]
+
+/-- Uniform expectation on X agrees with the manual cube average. -/
+theorem manual_expectation_first {n : ℕ} {ρ : ℝ} (hρ : ρ ∈ Set.Icc (-1 : ℝ) 1)
+    (f : WeakHellinger.BooleanFunc n) :
+    finiteExpectation (cubeNoiseLaw n ρ hρ) (fun z => f (manualCubeEquiv n z.1)) = WeakHellinger.expectation f := by
+  have hm := finiteExpectation_map (cubeNoiseLaw n ρ hρ) Prod.fst (fun x => f (manualCubeEquiv n x))
+  simp only [Function.comp_def] at hm
+  rw [← hm]
+  unfold finiteExpectation
+  simp_rw [cubeNoiseLaw_first]
+  rw [← Finset.mul_sum, (manualCubeEquiv n).sum_comp]
+  simp [WeakHellinger.expectation, div_eq_mul_inv, mul_comm]
+
+/-- Uniform expectation on Y agrees with the manual cube average. -/
+theorem manual_expectation_second {n : ℕ} {ρ : ℝ} (hρ : ρ ∈ Set.Icc (-1 : ℝ) 1)
+    (f : WeakHellinger.BooleanFunc n) :
+    finiteExpectation (cubeNoiseLaw n ρ hρ) (fun z => f (manualCubeEquiv n z.2)) = WeakHellinger.expectation f := by
+  have hm := finiteExpectation_map (cubeNoiseLaw n ρ hρ) Prod.snd (fun x => f (manualCubeEquiv n x))
+  simp only [Function.comp_def] at hm
+  rw [← hm]
+  unfold finiteExpectation
+  simp_rw [cubeNoiseLaw_second]
+  rw [← Finset.mul_sum, (manualCubeEquiv n).sum_comp]
+  simp [WeakHellinger.expectation, div_eq_mul_inv, mul_comm]
+
+/-- Joint expectation is a uniform average followed by the manual noise kernel. -/
+theorem manual_expectation_joint {n : ℕ} {ρ : ℝ} (hρ : ρ ∈ Set.Icc (-1 : ℝ) 1)
+    (f : WeakHellinger.HammingCube n → WeakHellinger.HammingCube n → ℝ) :
+    finiteExpectation (cubeNoiseLaw n ρ hρ)
+      (fun z => f (manualCubeEquiv n z.1) (manualCubeEquiv n z.2)) =
+    WeakHellinger.expectation (fun x => ∑ y, WeakHellinger.noiseKernel ρ x y * f x y) := by
+  classical
+  unfold finiteExpectation
+  simp only [cubeNoiseLaw, Fintype.sum_prod_type, mul_assoc]
+  simp_rw [← manual_noiseKernel, ← Finset.mul_sum]
+  have hsum : (∑ x : BooleanCube n, ∑ y : BooleanCube n,
+      WeakHellinger.noiseKernel ρ (manualCubeEquiv n x) (manualCubeEquiv n y) *
+        f (manualCubeEquiv n x) (manualCubeEquiv n y)) =
+      ∑ x : WeakHellinger.HammingCube n, ∑ y : WeakHellinger.HammingCube n,
+        WeakHellinger.noiseKernel ρ x y * f x y := by
+    have hinner (x : WeakHellinger.HammingCube n) := (manualCubeEquiv n).sum_comp
+      (fun y => WeakHellinger.noiseKernel ρ x y * f x y)
+    simp_rw [hinner]
+    exact (manualCubeEquiv n).sum_comp (fun x => ∑ y, WeakHellinger.noiseKernel ρ x y * f x y)
+  rw [hsum]
+  simp [WeakHellinger.expectation, div_eq_mul_inv, mul_comm]
+
+/-- Encode a real-valued Boolean function by its positive-sign indicator. -/
+def manualBool {n : ℕ} (f : WeakHellinger.BooleanFunc n) (x : BooleanCube n) : Bool :=
+  decide (f (manualCubeEquiv n x) = 1)
+
+/-- The indicator encoding preserves every sign value. -/
+theorem manual_boolSign {n : ℕ} (f : WeakHellinger.BooleanFunc n) (hf : WeakHellinger.BooleanValued f)
+    (x : BooleanCube n) : boolSign (manualBool f x) = f (manualCubeEquiv n x) := by
+  rcases hf (manualCubeEquiv n x) with h | h <;> norm_num [manualBool,boolSign,h]
+
+/-- Conditioning on the encoded sign is equivalent to conditioning on its real value. -/
+theorem manual_observation_eq {n : ℕ} (g : WeakHellinger.BooleanFunc n) (hg : WeakHellinger.BooleanValued g)
+    (x y : BooleanCube n) : manualBool g x = manualBool g y ↔
+      g (manualCubeEquiv n x) = g (manualCubeEquiv n y) := by
+  constructor
+  · intro h
+    simpa only [manual_boolSign g hg] using congrArg boolSign h
+  · intro h
+    simp [manualBool,h]
+
+/-- The conditional means coincide, including zero-mass conditioning events. -/
+theorem manual_conditionalMean {n : ℕ} {ρ : ℝ} (hρ : ρ ∈ Set.Icc (-1 : ℝ) 1)
+    (f g : WeakHellinger.BooleanFunc n) (hf : WeakHellinger.BooleanValued f)
+    (hg : WeakHellinger.BooleanValued g) (y : BooleanCube n) :
+    finiteConditionalMean (cubeNoiseLaw n ρ hρ) (fun z => boolSign (manualBool f z.1))
+      (fun z => manualBool g z.2) (manualBool g y) =
+    WeakHellinger.conditionalExpectation ρ f g (g (manualCubeEquiv n y)) := by
+  classical
+  unfold finiteConditionalMean WeakHellinger.conditionalExpectation
+  congr 1
+  · have h := manual_expectation_joint hρ
+      (fun x z => if g z = g (manualCubeEquiv n y) then f x else 0)
+    simpa only [finiteExpectation, mul_ite, mul_zero, manual_boolSign f hf,
+      manual_observation_eq g hg] using h
+  · have h := manual_expectation_second hρ
+      (fun z => if g z = g (manualCubeEquiv n y) then (1 : ℝ) else 0)
+    simpa only [finiteMap, finiteExpectation, mul_ite, mul_one, mul_zero,
+      manual_observation_eq g hg] using h
+
+/-- The conditional-semicircle expectation agrees with the manual uniform-Y average. -/
+theorem manual_conditionalSemicircle {n : ℕ} {ρ : ℝ} (hρ : ρ ∈ Set.Icc (-1 : ℝ) 1)
+    (f g : WeakHellinger.BooleanFunc n) (hf : WeakHellinger.BooleanValued f)
+    (hg : WeakHellinger.BooleanValued g) :
+    conditionalSemicircle (cubeNoiseLaw n ρ hρ) (fun z => boolSign (manualBool f z.1))
+      (fun z => manualBool g z.2) =
+    WeakHellinger.expectation (fun y => Real.sqrt (1 - (WeakHellinger.conditionalExpectation ρ f g (g y))^2)) := by
+  unfold conditionalSemicircle
+  rw [finiteExpectation_map]
+  simp only [Function.comp_def, manual_conditionalMean hρ f g hf hg]
+  exact manual_expectation_second hρ
+    (fun y => Real.sqrt (1 - (WeakHellinger.conditionalExpectation ρ f g (g y))^2))
+
+/-- Weak Hellinger in the exact manual formulation on Fin n → Fin 2, including n=0. -/
+theorem weak_hellinger_manual {n : ℕ} {ρ : ℝ} (hρ : ρ ∈ Set.Icc (-1 : ℝ) 1)
+    {f g : WeakHellinger.BooleanFunc n} (hf : WeakHellinger.BooleanValued f)
+    (hg : WeakHellinger.BooleanValued g) :
+    Real.sqrt (1 - (WeakHellinger.expectation f)^2) -
+      WeakHellinger.expectation (fun y => Real.sqrt (1 - (WeakHellinger.conditionalExpectation ρ f g (g y))^2)) ≤
+      1 - Real.sqrt (1-ρ^2) := by
+  have h := weak_hellinger n ρ hρ (manualBool f) (manualBool g)
+  rw [manual_conditionalSemicircle hρ f g hf hg] at h
+  simp only [manual_boolSign f hf] at h
+  rwa [manual_expectation_first hρ f] at h
+
+end
+
 end Auto

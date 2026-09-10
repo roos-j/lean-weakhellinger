@@ -30,8 +30,6 @@ Commit ONLY when Status.md is updated, immediately after that update. Preserve G
 
 # Current instructions
 
-Updated: 2026-09-08T14:05:25.442391-04:00 (recording time). Raw task-specific prompts are preserved in `automation/raw.md`, which is ignored by Git.
-
 Formalize `blueprints/weak_hellinger_three_point_blueprint.tex` (7 September 2026), Theorem `thm:main`, including every equality case and its prerequisite closure through `lem:boundary`. The independent upper-semicontinuous-envelope section is excluded. Continue until the entire agreed scope passes final verification; do not stop at milestones.
 
 Keep all remaining proof work in `WeakHellinger/Auto/ThreePointInequality.lean`, in namespace `Auto`. `WeakHellinger/Auto/FiniteCertificate.lean` contains the extracted real integer certificate, imports Mathlib only, and is frozen unless there is a very good reason to change it. Its frozen SHA256 is `0c99273c54cbe0affb6b4f6a09c474026b8bae73da98265a079c12b4281dd13e`. Its header already includes the user-instructed copyright holder, Joris Roos. Auto/ Lean headers begin with copyright, license, and the exact generation notice on their first three lines.
@@ -77,3 +75,8 @@ Rename the manual BooleanCube definition and uses to HammingCube. BooleanFunc n 
 ## 2026-09-10T17:22:21.123237-04:00 (recording time)
 
 Use a Prop-valued def for BooleanValued: forall x, f x = 1 or f x = -1. This supersedes the previously copied structure.
+
+
+## 2026-09-10T19:41:35.9002549-04:00 (recording time)
+
+User requested committing the pending changes. This supersedes earlier no-commit instructions for this checkpoint. Preserve the standing no-build and no-push restrictions. See automation/raw.md.
