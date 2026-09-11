@@ -48,8 +48,8 @@ Lean reports:
 
 ### Formal verification of explicit computations
 
-For the proof of the three-point inequality it is necessary to formally verify certain computer-assisted
-computations. More specifically, it must be proved that all ~52k coefficients of an explicit family of Bernstein approximation polynomials are positive. These coefficients are explicit rational numbers so that these computations
+For the proof of the three-point inequality it was necessary to formally verify certain computer-assisted
+computations. More specifically, it had to be proved that all ~52k coefficients of an explicit family of Bernstein approximation polynomials are positive. These coefficients are explicit rational numbers so that these computations
 can run in principle easily in the Lean kernel, without use of floating point numbers or interval arithmetic.
 
 The formal verification of these computations is in `FiniteCertificate.lean`, which is 
