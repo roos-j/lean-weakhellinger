@@ -58,7 +58,7 @@ On the author's machine the build took ~2.5h, with observed peak memory usage of
 
 ### Autoformalization
 
-The proofs were generated using Codex and a custom autoformalization skill. Further instruction and other automation-related files are contained in the `automation` folder.
+While the main theorem statements and definitions were human-generated, all proofs were generated using Codex/gpt-6-astra-medium with a custom autoformalization skill (see `.codex` folder). Further instructions and other automation-related files are contained in the `automation` folder.
 
 This repository keeps human-generated code separate from machine-generated code.
 All machine-generated Lean code is contained in the [Auto subfolder](WeakHellinger/Auto) and lives in the `Auto` namespace in Lean.
