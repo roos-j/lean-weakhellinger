@@ -4,9 +4,9 @@ This repository contains a Lean formalization of the weak Hellinger theorem.
 
 ### Statement of the main theorem
 
-Let $n\in\mathbb{N}$ and $\rho\in[-1,1]$. Let $X$ be uniform on $\{-1,1\}^n$,
+Let $n\in\mathbb{N}$ and $\rho\in[-1,1]$. Let $X$ be uniform on $`\{-1,1\}^n`$,
 and obtain $Y$ by independently flipping each coordinate of $X$ with probability
-$(1-\rho)/2$. Then for all Boolean functions $f,g:\{-1,1\}^n\to\{-1,1\}$,
+$(1-\rho)/2$. Then for all Boolean functions $`f,g:\{-1,1\}^n\to\{-1,1\}`$,
 
 ```math
 \sqrt{1-(\mathbf{E}f(X))^2}
@@ -45,6 +45,8 @@ Lean reports:
 ```text
 'WeakHellinger.weak_hellinger' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
+
+This means that Lean has successfully verified the proof of the theorem depending only on the standard axioms.
 
 ### Formal verification of explicit computations
 
