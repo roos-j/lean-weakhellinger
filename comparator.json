@@ -2,9 +2,7 @@
   "challenge_module": "Challenge",
   "solution_module": "Solution",
   "theorem_names": [
-    "WeakHellinger.weak_hellinger",
-    "WeakHellinger.three_point_inequality",
-    "WeakHellinger.three_point_inequality_equality"
+    "WeakHellinger.weak_hellinger"
   ],
   "permitted_axioms": [
     "propext",

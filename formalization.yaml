@@ -25,24 +25,12 @@ classification:
   arxiv: ["cs.IT", "math.CO"]
   msc2020: ["94A17", "60E15", "60C05"]
 status:
-  scope: "Theorem 1.1 and both parts of Proposition 2.1; supporting results are not separately selected for registration."
+  scope: "Theorem 1.1 only is selected for registration. Proposition 2.1 and its equality cases remain in the underlying formalization as supporting results."
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: ["propext", "Classical.choice", "Quot.sound"]
   main_results:
     - declaration: "WeakHellinger.weak_hellinger"
-      file: "WeakHellinger/Theorems.lean"
-      sorry_count: 0
-      axioms: ["propext", "Classical.choice", "Quot.sound"]
-      comparator_config: "comparator.json"
-      literature_dependencies: []
-    - declaration: "WeakHellinger.three_point_inequality"
-      file: "WeakHellinger/Theorems.lean"
-      sorry_count: 0
-      axioms: ["propext", "Classical.choice", "Quot.sound"]
-      comparator_config: "comparator.json"
-      literature_dependencies: []
-    - declaration: "WeakHellinger.three_point_inequality_equality"
       file: "WeakHellinger/Theorems.lean"
       sorry_count: 0
       axioms: ["propext", "Classical.choice", "Quot.sound"]

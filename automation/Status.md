@@ -328,3 +328,8 @@ Certificate olean: 835804024 bytes (797.085 MiB). Main olean: 15727888 bytes. Hi
 ## Lean v4.35.0-rc3 upgrade checkpoint
 
 2026-09-25T18:33:54.316678-04:00 (recording time): Updated Lean and matching Mathlib release pins and regenerated the manifest for palomar and master. lake update and targeted build of Challenge, WeakHellinger.Defs, and WeakHellinger.Auto.ReverseHypercontractivity passed (3292 jobs). Official Palomar toolchain gate now passes. No proof sources changed. Full proof/certificate rebuild and comparator revalidation on the new toolchain remain pending: observed free RAM was about 28 GiB versus the documented approximately 40 GiB certificate requirement. Prior full-build and axiom results apply only to the former toolchain. See automation/Palomar.md. Pending user metadata edits remain unstaged.
+
+
+## Palomar single-result checkpoint
+
+2026-09-25T18:40:46.120517-04:00 (recording time): Removed both three-point results from comparator.json, metadata main_results, and Challenge, preserving the underlying formalization. Only WeakHellinger.weak_hellinger is selected. The narrowed Challenge builds on v4.35.0-rc3; official metadata/config checks and exact canonical statement comparison pass. Full proof/certificate and Comparator revalidation remain pending from the toolchain upgrade. User metadata prose edits remain uncommitted.

@@ -90,3 +90,8 @@ User requested committing the pending changes. This supersedes earlier no-commit
 ## Latest Lean upgrade
 
 2026-09-25T18:29:55.966043-04:00 (recording time): User requests updating Lean on palomar and master to the latest version. Use the latest published release, v4.35.0-rc3, and the matching immutable Mathlib release commit. This is the requested follow-up to the documented toolchain blocker; carry the update to both branches. Preserve the pending user metadata edit and mathematical theorem statements. Rebuilding for the new toolchain is part of validation; preserve the frozen certificate source unless compatibility requires an explicitly documented repair.
+
+
+## Narrow Palomar selection
+
+2026-09-25T18:39:52.552969-04:00 (recording time): User requests removing the three-point inequality and equality theorems from the comparator/Palomar configuration. Select only WeakHellinger.weak_hellinger; synchronize Challenge, metadata and submission documentation. Keep the underlying three-point proofs and the pending user metadata description edits intact. This supersedes the initial three-result selection.

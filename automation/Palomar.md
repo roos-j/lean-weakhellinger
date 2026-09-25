@@ -1,5 +1,9 @@
 # Palomar preparation
 
+**Current submission scope:** Only `WeakHellinger.weak_hellinger` is selected.
+The three-point results remain in the proof development. The initial three-result
+selection and its checks below are historical.
+
 **Current state:** The subsequent toolchain upgrade pins Lean v4.35.0-rc3 and
 Mathlib c55e6e786f49471c72fbddbec5415808896aec1e on palomar and master.
 The old minimum-version blocker below is resolved. Build and comparator results
@@ -130,3 +134,8 @@ unchanged; old compiled artifacts cannot serve as evidence for the new Lean vers
 The prior minimum-version blocker is resolved, but full migration verification
 is not yet established. The user's pending formalization.yaml edits are preserved
 and excluded from the upgrade commits.
+
+
+## Single-result selection checkpoint
+
+2026-09-25T18:40:45.997226-04:00 (recording time): At the user's request, comparator.json and status.main_results now select only WeakHellinger.weak_hellinger (Theorem 1.1). The three-point inequality and equality characterization remain in the substantive proof development but have been removed from Challenge, along with their unused definitions and imports. README submission documentation is synchronized. The 94-line Challenge builds on Lean v4.35.0-rc3; official metadata and Comparator configuration parsing pass, and the selected theorem signature is textually identical to the canonical declaration. Full Solution/Comparator verification on the new toolchain remains pending as described above. User edits to metadata prose were preserved and excluded from this scope-change commit.
