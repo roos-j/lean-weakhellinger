@@ -85,3 +85,8 @@ User requested committing the pending changes. This supersedes earlier no-commit
 ## Palomar preparation
 
 2026-09-25T08:10:01.962264-04:00 (recording time): Prepare this substantive repository on a new palomar branch using the prepare-for-palomar skill. Source: arXiv:2609.28534v1. Use the exact metadata project title "Formalization of a weak Hellinger inequality" (overriding the skill title suffix). Commit and push are explicitly authorized for this task, superseding older prohibitions. Preserve the frozen finite certificate and existing proof statements. Expose the canonical WeakHellinger weak Hellinger theorem and both parts of Proposition 2.1; root Challenge/Solution files are authorized by the invoked preparation skill. No registry submission was requested. Raw prompt: automation/raw.md.
+
+
+## Latest Lean upgrade
+
+2026-09-25T18:29:55.966043-04:00 (recording time): User requests updating Lean on palomar and master to the latest version. Use the latest published release, v4.35.0-rc3, and the matching immutable Mathlib release commit. This is the requested follow-up to the documented toolchain blocker; carry the update to both branches. Preserve the pending user metadata edit and mathematical theorem statements. Rebuilding for the new toolchain is part of validation; preserve the frozen certificate source unless compatibility requires an explicitly documented repair.

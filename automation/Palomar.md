@@ -1,5 +1,11 @@
 # Palomar preparation
 
+**Current state:** The subsequent toolchain upgrade pins Lean v4.35.0-rc3 and
+Mathlib c55e6e786f49471c72fbddbec5415808896aec1e on palomar and master.
+The old minimum-version blocker below is resolved. Build and comparator results
+in the initial report apply to the old toolchain, not automatically to the new one.
+See the upgrade checkpoint below for current validation.
+
 Recorded: 2026-09-25T08:15:26.379445-04:00
 
 ## Selected surface
@@ -50,7 +56,7 @@ The exact requested project title is retained without the skill's default
   Its 835804024-byte olean retains its original modification time. It was neither
   modified nor rebuilt.
 
-## Mechanical blocker and unrun checks
+## Initial mechanical blocker and unrun checks (superseded by upgrade)
 
 The official toolchain check rejects `leanprover/lean4:v4.34.0-rc2`: the current
 [minimum](https://github.com/PalomarRegistry/PalomarSubmission/blob/a59f25bd8a66bf6faf3a4f4260d412989c0185ea/toolchains.json)
@@ -91,3 +97,36 @@ agent assessment, not a Palomar decision.
 Final submission requires a public immutable commit satisfying the current gates
 and the submitter's own responsible-author/maintainer or approval declaration.
 This preparation task commits and pushes the branch but does not submit or register it.
+
+
+## Lean upgrade checkpoint
+
+Recorded: 2026-09-25T18:33:54.238058-04:00
+
+Both palomar and master now pin `leanprover/lean4:v4.35.0-rc3`, the newest
+published Lean release (a release candidate), and the matching Mathlib release
+commit `c55e6e786f49471c72fbddbec5415808896aec1e`. The latest stable release at
+this check was v4.34.1; the release candidate was selected to satisfy the request
+for the latest version and Palomar's minimum. Release references:
+[Lean](https://github.com/leanprover/lean4/releases/tag/v4.35.0-rc3) and
+[Mathlib](https://github.com/leanprover-community/mathlib4/releases/tag/v4.35.0-rc3).
+
+`lake update` completed, including dependency cache retrieval. Both branches have
+identical regenerated manifests and matching Lean/Mathlib toolchains. Master
+retains only its original library target; Palomar retains its submission targets.
+The official supported-toolchain check now passes.
+
+`lake build Challenge WeakHellinger.Defs WeakHellinger.Auto.ReverseHypercontractivity`
+passed on the new toolchain (3292 jobs), with expected Challenge placeholders and
+non-failing linter/deprecation messages. The shared definitions and independent
+proof module are byte-identical on the two branches, so this check also covers
+those master sources. No mathematical source changes were needed.
+
+Full `lake build`, Solution/Quick Comparator, and official export/NanoDa checks
+remain pending on the new toolchain. The machine had about 28 GiB free RAM when
+checked, below the certificate's documented approximately 40 GiB requirement.
+The expensive certificate build was not started. Its frozen source hash is
+unchanged; old compiled artifacts cannot serve as evidence for the new Lean version.
+The prior minimum-version blocker is resolved, but full migration verification
+is not yet established. The user's pending formalization.yaml edits are preserved
+and excluded from the upgrade commits.

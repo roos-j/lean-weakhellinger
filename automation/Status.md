@@ -323,3 +323,8 @@ Certificate olean: 835804024 bytes (797.085 MiB). Main olean: 15727888 bytes. Hi
 ## Palomar preparation checkpoint
 
 2026-09-25T08:15:47.370867-04:00 (recording time): Prepared Challenge/Solution, comparator.json and formalization.yaml on branch palomar with the requested title and arXiv source. Full incremental lake build and Quick Comparator passed; all three canonical targets use only standard axioms. Official metadata/configuration/manifest checks passed. The frozen certificate was reused unchanged. Current Palomar minimum Lean v4.35.0-rc2 rejects this project pin v4.34.0-rc2; official Comparator/export/NanoDa/sandbox checks remain unrun. Packaging is complete, registry readiness is blocked pending a separately authorized toolchain migration and certificate rebuild. See automation/Palomar.md for evidence and editorial assessment. User authorized this checkpoint commit and push.
+
+
+## Lean v4.35.0-rc3 upgrade checkpoint
+
+2026-09-25T18:33:54.316678-04:00 (recording time): Updated Lean and matching Mathlib release pins and regenerated the manifest for palomar and master. lake update and targeted build of Challenge, WeakHellinger.Defs, and WeakHellinger.Auto.ReverseHypercontractivity passed (3292 jobs). Official Palomar toolchain gate now passes. No proof sources changed. Full proof/certificate rebuild and comparator revalidation on the new toolchain remain pending: observed free RAM was about 28 GiB versus the documented approximately 40 GiB certificate requirement. Prior full-build and axiom results apply only to the former toolchain. See automation/Palomar.md. Pending user metadata edits remain unstaged.
