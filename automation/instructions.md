@@ -80,3 +80,8 @@ Use a Prop-valued def for BooleanValued: forall x, f x = 1 or f x = -1. This sup
 ## 2026-09-10T19:41:35.9002549-04:00 (recording time)
 
 User requested committing the pending changes. This supersedes earlier no-commit instructions for this checkpoint. Preserve the standing no-build and no-push restrictions. See automation/raw.md.
+
+
+## Latest Lean upgrade
+
+2026-09-25T18:31:03.558219-04:00 (recording time): User requests updating Lean on master and palomar to the latest version. Pin v4.35.0-rc3 and the matching immutable Mathlib release revision. Preserve the mathematical statements and finite-certificate source. This follows the Palomar preparation task and its toolchain blocker.
