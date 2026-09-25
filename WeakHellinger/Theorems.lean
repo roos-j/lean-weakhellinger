@@ -23,7 +23,7 @@ theorem three_point_inequality_equality {s c d : ℝ}
     F s c d = 0 ↔ s = 0 ∨ s = 1 ∨ c + d = 1 ∨ (s = 2⁻¹ ∧ c = d) :=
   Auto.three_point_inequality_equality_manual hs hc hd
 
-/-- **Weak Hellinger theorem.**
+/-- **Weak Hellinger inequality.**
 
 For every `n`, `ρ ∈ [-1,1]`, uniform `X` on `{±1}ⁿ` and `ρ`-correlated `Y`:
 `√(1 - (E f(X))²) - E √(1 - (E[f(X) | g(Y)])²) ≤ 1 - √(1 - ρ²)`. -/

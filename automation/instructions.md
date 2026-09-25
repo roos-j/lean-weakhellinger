@@ -80,3 +80,8 @@ Use a Prop-valued def for BooleanValued: forall x, f x = 1 or f x = -1. This sup
 ## 2026-09-10T19:41:35.9002549-04:00 (recording time)
 
 User requested committing the pending changes. This supersedes earlier no-commit instructions for this checkpoint. Preserve the standing no-build and no-push restrictions. See automation/raw.md.
+
+
+## Palomar preparation
+
+2026-09-25T08:10:01.962264-04:00 (recording time): Prepare this substantive repository on a new palomar branch using the prepare-for-palomar skill. Source: arXiv:2609.28534v1. Use the exact metadata project title "Formalization of a weak Hellinger inequality" (overriding the skill title suffix). Commit and push are explicitly authorized for this task, superseding older prohibitions. Preserve the frozen finite certificate and existing proof statements. Expose the canonical WeakHellinger weak Hellinger theorem and both parts of Proposition 2.1; root Challenge/Solution files are authorized by the invoked preparation skill. No registry submission was requested. Raw prompt: automation/raw.md.

@@ -318,3 +318,8 @@ Certificate olean: 835804024 bytes (797.085 MiB). Main olean: 15727888 bytes. Hi
 ## Manual theorem bridge commit checkpoint
 
 2026-09-10T19:41:35.9002549-04:00 (recording time): User requested committing the existing bridge development in WeakHellinger/Auto/ThreePointInequality.lean and WeakHellinger/Auto/Reduction.lean, and its use in WeakHellinger/Theorems.lean. The three manual theorem placeholders are replaced by bridge applications, including the limsup boundary and equality characterization. Git whitespace checks and placeholder scans pass. No Lean build or axiom audit was run during this commit task, in accordance with standing build restrictions; this checkpoint does not assert new verified completion. FiniteCertificate.lean is unchanged.
+
+
+## Palomar preparation checkpoint
+
+2026-09-25T08:15:47.370867-04:00 (recording time): Prepared Challenge/Solution, comparator.json and formalization.yaml on branch palomar with the requested title and arXiv source. Full incremental lake build and Quick Comparator passed; all three canonical targets use only standard axioms. Official metadata/configuration/manifest checks passed. The frozen certificate was reused unchanged. Current Palomar minimum Lean v4.35.0-rc2 rejects this project pin v4.34.0-rc2; official Comparator/export/NanoDa/sandbox checks remain unrun. Packaging is complete, registry readiness is blocked pending a separately authorized toolchain migration and certificate rebuild. See automation/Palomar.md for evidence and editorial assessment. User authorized this checkpoint commit and push.
