@@ -1,6 +1,8 @@
 ## Formalization of the weak Hellinger theorem
 
-This repository contains a Lean formalization of the weak Hellinger theorem.
+This repository contains a Lean formalization of the weak Hellinger inequality, the main result of the paper
+
+P. Durcik, M. Fraccaroli, J. Roos. *A weak Hellinger inequality for noisy Boolean channels*, 20 pp., [arXiv:2609.28534](https://arxiv.org/abs/2609.28534).
 
 ### Statement of the main theorem
 
